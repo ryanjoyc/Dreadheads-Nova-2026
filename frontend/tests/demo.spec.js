@@ -81,3 +81,25 @@ test("outside-hours proposal needs approval and rejection keeps it out", async (
   await page.reload(); await loaded(page);
   await expect(page.getByRole("button",{name:"Approve for today",exact:true})).toBeVisible();
 });
+
+test("optional AI inputs reach the API and analysis evidence stays in Setup", async ({page}) => {
+  await page.goto("/"); await loaded(page); await settings(page);
+  await expect(page.getByLabel("Use AI analysis (backend key required)")).not.toBeChecked();
+  await page.route("**/api/tablet?**", async route=>{
+    const url=new URL(route.request().url());
+    expect(url.searchParams.get("use_agent")).toBe("true");
+    expect(url.searchParams.get("context")).toBe("Campus event");
+    // Read the actual baseline, then simulate only the UI-facing model metadata.
+    const res=await page.request.get("/api/tablet?date=2026-10-29&use_agent=false");
+    const data=await res.json();
+    data.analysis={method:"agent",model:"scripted/test",summary:"Scripted UI verification",flags:[],agent_trace:[{tool:"get_rush_forecast",args:{},result:"Four earlier Thursdays"}]};
+    await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify(data)});
+  });
+  await page.getByLabel("Day context").fill("Campus event");
+  await page.getByLabel("Use AI analysis (backend key required)").check();
+  await page.getByRole("button",{name:"Load day",exact:true}).click(); await loaded(page);
+  await page.getByRole("button",{name:"Setup",exact:true}).click(); await loaded(page);
+  await expect(page.getByText("AI-assisted · scripted/test",{exact:true})).toBeVisible();
+  await page.getByText("How the agent checked the data",{exact:true}).click();
+  await expect(page.getByText("get_rush_forecast: Four earlier Thursdays",{exact:true})).toBeVisible();
+});

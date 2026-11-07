@@ -118,6 +118,12 @@ def forecast(
         counts = day_traffic(session, scope, past, slot_minutes)
         if counts:
             result.history[past] = counts
+    return forecast_from_history(day, slot_minutes, result.history)
+
+
+def forecast_from_history(day: date, slot_minutes: int, history: dict) -> Forecast:
+    """The same forecast math for DB readers and already-scoped tablet records."""
+    result = Forecast(day=day, slot_minutes=slot_minutes, history=history)
     if not result.history:
         return result
     slots = sorted({slot for counts in result.history.values() for slot in counts})

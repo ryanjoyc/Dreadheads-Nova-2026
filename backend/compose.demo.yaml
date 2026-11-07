@@ -5,7 +5,14 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://nova:nova_local@db:5432/nova_sales
       RAW_STORAGE_PATH: /raw-imports
+      OPENROUTER_KEY: ${OPENROUTER_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-anthropic/claude-sonnet-5.5}
       CORS_ORIGINS: '["http://localhost:5173","http://127.0.0.1:5173"]'
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/openapi.json', timeout=2)"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
     ports:
       - '127.0.0.1:8003:8000'
     volumes:

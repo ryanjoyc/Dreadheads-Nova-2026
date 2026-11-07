@@ -125,6 +125,5 @@ def test_documentation_and_openapi(client):
         "/dishes/top",
         "/tablet",
         "/tablet/outlook",
-
         "/rush-hours",
     }

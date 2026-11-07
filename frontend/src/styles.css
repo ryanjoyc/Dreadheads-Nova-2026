@@ -254,3 +254,5 @@ button:active { transform:translateY(1px); }
 @media(max-width:25rem) { .bar h1 { font-size:1.5rem; } }
 .proposal .moves button { background:var(--focus); color:var(--surface); }
 .proposal .moves button[data-reject] { background:#f2f2f7; color:var(--ink); }
+#controls .agent-toggle { flex-direction:row; align-items:center; max-width:18rem; }
+.agent-toggle input { min-height:0; width:1.125rem; height:1.125rem; }

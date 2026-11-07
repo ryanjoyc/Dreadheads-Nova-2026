@@ -34,7 +34,7 @@ def _pages(fetch, params):
         params = params.model_copy(update={"cursor": cursor})
 
 
-def analyze_lines(lines, target: date, source=None):
+def analyze_lines(lines, target: date, source=None, analysis=None):
     """Analyze normalized query rows, retaining provider identities until mapped."""
     if source not in (None, "doordash", "grubhub"):
         raise ValueError("Unknown sales source")
@@ -85,11 +85,20 @@ def analyze_lines(lines, target: date, source=None):
             orders[row["slot"]].add(row["order"])
         return [len(ids) for ids in orders]
 
-    def dishes(rows, divisor=1, start=0, end=96):
+    multipliers = [1.0] * 96
+    if analysis is not None:
+        for window in analysis["rush_hours"]:
+            start = int(window["start"][:2]) * 4 + int(window["start"][3:]) // 15
+            end = int(window["end"][:2]) * 4 + int(window["end"][3:]) // 15
+            for slot in range(start, end):
+                multipliers[slot] = window["multiplier"]
+
+    def dishes(rows, divisor=1, start=0, end=96, projected=False):
         quantities = defaultdict(Decimal)
         for row in rows:
             if start <= row["slot"] < end:
-                quantities[row["item"]] += row["qty"]
+                multiplier = Decimal(str(multipliers[row["slot"]])) if projected else Decimal(1)
+                quantities[row["item"]] += row["qty"] * multiplier
         return [
             {
                 "id": item_id,
@@ -117,6 +126,17 @@ def analyze_lines(lines, target: date, source=None):
                 windows[-1][1] = slot + 1
             else:
                 windows.append([slot, slot + 1])
+    metadata = {}
+    if analysis is not None:
+        windows = []
+        for window in analysis["rush_hours"]:
+            start = int(window["start"][:2]) * 4 + int(window["start"][3:]) // 15
+            end = int(window["end"][:2]) * 4 + int(window["end"][3:]) // 15
+            windows.append((start, end))
+            metadata[(start, end)] = window
+        expected = [value * multipliers[slot] for slot, value in enumerate(expected)]
+        threshold = analysis["rush_threshold"]
+    rush_slots = {slot for start, end in windows for slot in range(start, end)}
     rushes = []
     for start, end in windows:
         peak = max(range(start, end), key=expected.__getitem__)
@@ -127,10 +147,16 @@ def analyze_lines(lines, target: date, source=None):
                 "expected_orders": round(sum(expected[start:end]), 1),
                 "peak_at": _label(peak),
                 "peak_orders": round(expected[peak], 1),
-                "dishes": dishes(history_rows, denominator, start, end),
+                "dishes": dishes(history_rows, denominator, start, end, projected=True),
+                **{
+                    key: value
+                    for key, value in metadata.get((start, end), {}).items()
+                    if key in {"reason", "confidence", "consistency", "intensity", "multiplier"}
+                },
+                **({"confidence": "low"} if analysis is not None and denominator < 3 else {}),
             }
         )
-    peak = max(range(96), key=expected.__getitem__) if active else None
+    peak = max(range(96), key=expected.__getitem__) if any(expected) else None
     observed_rows = by_day.get(target)
     observed_traffic = traffic(observed_rows) if observed_rows else None
     reason = (
@@ -144,7 +170,12 @@ def analyze_lines(lines, target: date, source=None):
         "date": target.isoformat(),
         "source": source or "all",
         "is_synthetic": True,
-        "method": "same_weekday_average",
+        "method": analysis["method"] if analysis is not None else "same_weekday_average",
+        "analysis": {
+            key: analysis[key] for key in ["method", "model", "summary", "flags", "agent_trace"]
+        }
+        if analysis is not None
+        else None,
         "history_dates": [day.isoformat() for day in history],
         "history_days": denominator,
         "reason": reason,
@@ -158,11 +189,11 @@ def analyze_lines(lines, target: date, source=None):
                 {
                     "time": _label(slot),
                     "expected_orders": round(value, 2),
-                    "is_rush": value >= threshold,
+                    "is_rush": slot in rush_slots,
                 }
                 for slot, value in enumerate(expected)
             ],
-            "dishes": dishes(history_rows, denominator) if denominator else [],
+            "dishes": dishes(history_rows, denominator, projected=True) if denominator else [],
         },
         "observed": {
             "orders": len({row["order"] for row in observed_rows}),
@@ -216,9 +247,37 @@ def _cohort_lines(session, source=None):
     return lines
 
 
-def tablet_analysis(session, target: date, source=None):
-    """Read the sales cohort once and calculate one target day's forecast."""
-    return analyze_lines(_cohort_lines(session, source), target, source)
+def tablet_analysis(session, target: date, source=None, use_agent=False, context=None):
+    """Bind John's rush engine to the explicit cohort, then adapt dish/window results."""
+    from nova_backend.rush_agent import predict_rush_hours
+    from nova_backend.schemas import RushParams
+    from nova_backend.tablet_tools import TabletTools
+
+    lines = _cohort_lines(session, source)
+    # Validate the complete input before allowing model tools to inspect it.
+    analyze_lines(lines, target, source)
+    params = RushParams(
+        date=target,
+        source=source,
+        use_agent=use_agent,
+        context=context,
+        store_name="Tartan Express - K-Station (SYNTHETIC)",
+    )
+    tools = TabletTools(lines, params)
+    actual = defaultdict(set)
+    for row in lines:
+        placed = row["placed_at_local"]
+        if placed.date() == target:
+            minute = (placed.hour * 60 + placed.minute) // 15 * 15
+            actual[minute].add(row["order_id"])
+    analysis = predict_rush_hours(
+        session,
+        params,
+        forecast=tools.fc,
+        actual_traffic={minute: len(orders) for minute, orders in actual.items()},
+        bound_tools=tools,
+    )
+    return analyze_lines(lines, target, source, analysis)
 
 
 def analyze_outlook(lines, target: date, source=None, days=7):

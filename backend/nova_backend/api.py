@@ -121,12 +121,14 @@ def tablet(
     session: SessionDependency,
     date: Date = Query(..., description="Store-local forecast date, YYYY-MM-DD"),
     source: Literal["doordash", "grubhub"] | None = None,
+    use_agent: bool = False,
+    context: str | None = Query(default=None, max_length=500),
 ):
     """Sales-only synthetic K-Station forecast and observed history for the tablet."""
     from nova_backend.tablet import tablet_analysis
 
     try:
-        return tablet_analysis(session, date, source)
+        return tablet_analysis(session, date, source, use_agent=use_agent, context=context)
     except ValueError as exc:
         return JSONResponse(status_code=503, content={"detail": str(exc)})
 
@@ -144,6 +146,7 @@ def tablet_outlook(
         return analyze(session, date, source)
     except ValueError as exc:
         return JSONResponse(status_code=503, content={"detail": str(exc)})
+
 
 @app.get("/rush-hours", response_model=RushHoursOut)
 def rush_hours(params: Annotated[RushParams, Query()], session: SessionDependency):

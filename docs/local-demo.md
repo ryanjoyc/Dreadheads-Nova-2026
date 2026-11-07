@@ -8,7 +8,7 @@ From the `NOVA 2026-integration` checkout, with Docker running and Node/npm inst
 
 Open http://127.0.0.1:5173. The script builds a separate demo API, starts PostgreSQL if needed, applies migrations, imports both K-Station CSVs, and starts Vite. Existing restaurant records are preserved. Reimporting the same complete-order reports updates this cohort without duplicating orders; each import creates an audit record.
 
-The sales API already running on port 8000 remains available. The demo API uses port 8003 and the same development database. Its interactive API documentation is at http://127.0.0.1:8003/docs. The separate legacy agent service is not required; no API key or model call is needed.
+The sales API already running on port 8000 remains available. The demo API uses port 8003 and the same development database. Its interactive API documentation is at http://127.0.0.1:8003/docs. The separate legacy recipe agent service is not used. The tablet uses John's sales-only rush engine. Baseline mode requires no key or model call. Optional AI mode is described below.
 
 If the tablet is already running, use that tab instead of launching a second Vite process on port 5173. Press Ctrl-C in the terminal running Vite to stop it. Stop only the demo API with:
 
@@ -41,7 +41,7 @@ Synthetic provider CSV reports
   → tablet rush windows and dish counts
 ```
 
-The API reads through the existing paginated sales query functions. It selects DoorDash store `9900201` and Grubhub store `8800201`; other demo restaurants are excluded. Cross-platform dishes use the explicit synthetic manifest mapping. Date/feed changes fetch new results. The browser caches results until **Load day**, a scenario change, or a page reload; use Load day after reimporting data.
+The API reads through the existing paginated sales query functions. John's rush engine and its request-local tools then analyze that same K-Station snapshot. It selects DoorDash store `9900201` and Grubhub store `8800201`; other demo restaurants are excluded. Cross-platform dishes use the explicit synthetic manifest mapping. Date/feed changes fetch new results. The browser caches results until **Load day**, a scenario change, or a page reload; use Load day after reimporting data.
 
 Forecasts average up to eight weeks of earlier matching weekdays with recorded sales. Missing dates are not assumed closed. Every seven-day outlook uses only records before its original start date. Target-day observations are shown separately and never enter that date's forecast. Zero-history selections show an empty state rather than an invented estimate. Rushes are adjacent 15-minute slots meeting a 1.5× active-slot mean threshold, with at least two expected orders per slot.
 
@@ -77,3 +77,13 @@ Use October 29 at 09:30 with Both feeds. The demo standing rush windows are expl
 The sales forecast detects a 14:30–14:45 window outside those standing windows. It appears as a proposal on Next rush and Rest of today. Its dish counts are withheld until **Approve for today** is selected. Approval adds its calculated dish counts to Rest of today in time order. **Reject rush** excludes it; **Review again** returns it to pending.
 
 Decisions are browser-memory demo state, scoped to the selected date, feed, and time window. They reset on page reload and do not create a standing rush for future days or save to the backend. Tomorrow and the seven-day outlook remain sales estimates, not approved schedules.
+
+## Optional AI-assisted rush analysis
+
+The default is historical baseline mode. Expand Demo settings, enter optional day context, enable **Use AI analysis**, and select Load day to request the model-assisted path. Put `OPENROUTER_KEY` in `backend/.env`, keep it local, and recreate the demo API with the Compose files above after changing it. The key is read by the backend, never the browser.
+
+`GET /tablet` accepts `use_agent=false|true` and optional `context` (up to 500 characters). It binds all four of John's tools to the exact loaded K-Station cohort and strictly earlier historical rows. The model can propose different rush windows and bounded multipliers; Python recalculates the window's order and canonical dish forecasts, slot counts, and whole-day totals. Observed sales stay unadjusted. Fewer than three comparison days force low confidence.
+
+Setup displays baseline versus AI-assisted method, summary, fallback flags, and the agent tool trace when available. If the key is missing or the model fails, the tablet retains the historical forecast with a visible fallback explanation in Setup. Changing AI/context settings and selecting Load day clears the browser response cache. Further ahead remains a deterministic seven-day outlook with historical input frozen before its start date; the AI checkbox affects single-day rush analysis only.
+
+The integration was verified with scripted model replies and failures; verification does not require spending credits on live model requests.

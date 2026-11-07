@@ -12,6 +12,8 @@ app.innerHTML = `
   <details><summary>Demo settings</summary><form id="controls">
     <label>Demo date<input id="target-date" type="date" required value="2026-10-29"></label>
     <label>Time of day<input id="demo-time" type="time" required value="09:30"></label>
+    <label>Day context<input id="day-context" type="text" maxlength="500" placeholder="Optional event or weather information"></label>
+    <label class="agent-toggle"><input id="use-agent" type="checkbox">Use AI analysis (backend key required)</label>
     <button type="submit" class="load-button">Load day</button>
   </form><div class="demo-buttons" aria-label="Example dates"><button type="button" data-date="2026-10-25">Quiet Sunday</button><button type="button" data-date="2026-10-29">Busy Thursday</button><button type="button" data-date="2026-10-21">One-off spike</button></div>
   <div class="demo-buttons" role="group" aria-label="Sales feeds"><button type="button" data-source="all" aria-pressed="true">Both feeds</button><button type="button" data-source="doordash" aria-pressed="false">DoorDash</button><button type="button" data-source="grubhub" aria-pressed="false">Grubhub</button></div></details></div>
@@ -48,17 +50,22 @@ function proposalBlocks(data) {
     const key=esc(decisionKey(rush,data));
     const decision=rushDecision(rush,data);
     if(decision) return `<section class="note" aria-label="Rush decision" aria-live="polite"><p>${esc(rush.start)}–${esc(rush.end)} ${decision==="approved"?"approved for today. Its dish counts appear on Rest of today.":"rejected for today. It is excluded from today's rush list."}</p><button type="button" data-review="${key}">Review again</button></section>`;
-    return `<section class="proposal" aria-label="Rush proposal"><h2>${esc(rush.start)}–${esc(rush.end)} proposal</h2><p>Outside the standing lunch and dinner rushes. The forecast finds extra traffic here, based on ${data.history_days} earlier matching weekdays.</p><p>No dish counts until the lead approves.</p><div class="moves"><button type="button" data-approve="${key}">Approve for today</button><button type="button" data-reject="${key}">Reject rush</button></div></section>`;
+    return `<section class="proposal" aria-label="Rush proposal"><h2>${esc(rush.start)}–${esc(rush.end)} proposal</h2><p>Outside the standing lunch and dinner rushes. ${esc(rush.reason || `The forecast finds extra traffic here, based on ${data.history_days} earlier matching weekdays.`)}</p><p>No dish counts until the lead approves.</p><div class="moves"><button type="button" data-approve="${key}">Approve for today</button><button type="button" data-reject="${key}">Reject rush</button></div></section>`;
   }).join("");
 }
 function rushBlock(rush,data,next=false) {
-  return `<section class="rush" aria-label="${esc(rushName(rush))}"><h2>${esc(rushName(rush))} · ${esc(rush.start)}–${esc(rush.end)}</h2><p class="meta">${next?"Next predicted rush. ":""}${rushDecision(rush,data)==="approved"?"Approved for today. ":""}About ${count(rush.expected_orders)} orders.</p><p class="why">Based on ${data.history_days} earlier ${new Intl.DateTimeFormat("en-US",{weekday:"long",timeZone:"UTC"}).format(new Date(data.date+"T12:00:00Z"))}s.</p><p class="meta">Expected dish sales</p>${dishList(rush.dishes)}</section>`;
+  return `<section class="rush" aria-label="${esc(rushName(rush))}"><h2>${esc(rushName(rush))} · ${esc(rush.start)}–${esc(rush.end)}</h2><p class="meta">${next?"Next predicted rush. ":""}${rushDecision(rush,data)==="approved"?"Approved for today. ":""}About ${count(rush.expected_orders)} orders.</p><p class="why">${esc(rush.reason || `Based on ${data.history_days} earlier matching weekdays.`)}</p>${rush.confidence ? `<p class="meta">${esc(rush.confidence)} confidence · ${Math.round(rush.consistency*100)}% historical consistency</p>` : ""}<p class="meta">Expected dish sales</p>${dishList(rush.dishes)}</section>`;
 }
 function noHistory(data) {
   return `<section class="note"><h2>No earlier matching weekdays</h2><p>There isn't enough sales history to estimate this day. Choose a later demo date.</p>${data.observed?`<p>${count(data.observed.orders)} orders were recorded on this date.</p>`:""}</section>`;
 }
+function analysisDetails(data) {
+  const analysis=data.analysis;
+  if(!analysis) return "";
+  return `<h3>Rush analysis</h3><p>${analysis.method==="agent"?"AI-assisted":"Historical baseline"}${analysis.model?` · ${esc(analysis.model)}`:""}</p><p>${esc(analysis.summary)}</p>${analysis.flags.map(flag=>`<p class="meta">${esc(flag)}</p>`).join("")}${analysis.agent_trace.length?`<details><summary>How the agent checked the data</summary><ul>${analysis.agent_trace.map(step=>`<li>${esc(step.tool)}: ${esc(step.result)}</li>`).join("")}</ul></details>`:""}`;
+}
 function setup(data) {
-  return `<section class="setup-block"><h2>Sales forecast</h2><p>${esc(data.reason)}</p><p>Dish counts are expected sales, rounded to whole dishes.</p><h3>Standing rushes (demo settings)</h3><p>Lunch 11:00–14:00 · Dinner 17:00–20:30. Busy windows outside these times require approval. Decisions apply only to this date and feed selection, and reset on page reload.</p><h3>History used</h3><p>${data.history_dates.map(esc).join(", ")||"No earlier matching weekdays"}</p><h3>Sales feeds</h3><p>${state.source==="all"?"DoorDash and Grubhub":esc(state.source)} · K-Station stores only.</p></section><section class="setup-block"><h2>Demo evidence</h2><p>${data.history_days?`Forecast: ${count(data.forecast.orders)} orders.`:"No forecast available."}${data.observed?` Observed on this date: ${count(data.observed.orders)} orders.`:" No observed sales for this date."}</p><p>Rushes are consecutive 15-minute slots with at least 1.5 times average active-slot traffic and at least 2 expected orders per slot.</p><p>Mock sales → PostgreSQL → sales API → analysis → tablet. No AI model is called in this demo.</p><p>${esc(data.caveat)}</p></section>`;
+  return `<section class="setup-block"><h2>Sales forecast</h2><p>${esc(data.reason)}</p><p>Dish counts are expected sales, rounded to whole dishes.</p><h3>Standing rushes (demo settings)</h3><p>Lunch 11:00–14:00 · Dinner 17:00–20:30. Busy windows outside these times require approval. Decisions apply only to this date and feed selection, and reset on page reload.</p><h3>History used</h3><p>${data.history_dates.map(esc).join(", ")||"No earlier matching weekdays"}</p><h3>Sales feeds</h3><p>${state.source==="all"?"DoorDash and Grubhub":esc(state.source)} · K-Station stores only.</p></section><section class="setup-block"><h2>Demo evidence</h2><p>${data.history_days?`Forecast: ${count(data.forecast.orders)} orders.`:"No forecast available."}${data.observed?` Observed on this date: ${count(data.observed.orders)} orders.`:" No observed sales for this date."}</p><p>Rushes are consecutive 15-minute slots with at least 1.5 times average active-slot traffic and at least 2 expected orders per slot.</p><p>Mock sales → PostgreSQL → sales API → analysis → tablet. The optional AI analysis uses backend-held credentials.</p>${analysisDetails(data)}<p>${esc(data.caveat)}</p></section>`;
 }
 function paint() {
   document.querySelectorAll("[data-view]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.view===state.view)));
@@ -91,6 +98,11 @@ async function load(refresh=false) {
   controller?.abort();controller=new AbortController();const request=++state.request;
   const day=state.view==="tomorrow"?addDays(dateInput.value,1):dateInput.value;
   const params=new URLSearchParams({date:day});if(state.source!=="all")params.set("source",state.source);
+  if(state.view!=="ahead") {
+    params.set("use_agent",String(document.querySelector("#use-agent").checked));
+    const context=document.querySelector("#day-context").value.trim();
+    if(context)params.set("context",context);
+  }
   const path=state.view==="ahead"?"/tablet/outlook":"/tablet";
   const key=`${path}?${params}`;
   state.error="";state.data=null;

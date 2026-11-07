@@ -12,6 +12,7 @@ forecast's rush windows and adds a flag saying so.
 
 import json
 import logging
+import math
 import re
 from collections.abc import Callable
 from datetime import date, time
@@ -82,10 +83,14 @@ def _chat(messages: list[dict[str, Any]], tools: list[dict[str, Any]], model: st
         raise AgentError(f"OpenRouter request failed ({type(exc).__name__})") from exc
     if response.status_code != 200:
         raise AgentError(f"OpenRouter returned HTTP {response.status_code}")
-    data = response.json()
-    if "error" in data or not data.get("choices"):
+    try:
+        data = response.json()
+        message = data["choices"][0]["message"]
+    except (ValueError, TypeError, KeyError, IndexError) as exc:
+        raise AgentError("OpenRouter returned an invalid response") from exc
+    if not isinstance(message, dict) or "error" in data:
         raise AgentError("OpenRouter returned an error")
-    return data["choices"][0]["message"]
+    return message
 
 
 def _tool(name: str, description: str, properties: dict[str, Any], required: list[str]):
@@ -262,8 +267,8 @@ def _brief(result: dict[str, Any]) -> str:
 
 
 def _parse_json(content: str | None) -> dict[str, Any]:
-    if not content:
-        raise AgentError("The model returned no answer")
+    if not isinstance(content, str) or not content:
+        raise AgentError("The model returned no text answer")
     match = re.search(r"\{.*\}", content, re.DOTALL)
     try:
         decision = json.loads(match.group(0) if match else content)
@@ -271,6 +276,11 @@ def _parse_json(content: str | None) -> dict[str, Any]:
         raise AgentError("The model's answer was not JSON") from exc
     if not isinstance(decision, dict) or not isinstance(decision.get("rush_hours"), list):
         raise AgentError("The model's answer had no rush_hours list")
+    flags = decision.get("flags")
+    if flags is not None and (
+        not isinstance(flags, list) or not all(isinstance(flag, str) for flag in flags)
+    ):
+        raise AgentError("The model's flags must be a list of strings")
     return decision
 
 
@@ -278,9 +288,14 @@ ChatFn = Callable[[list[dict[str, Any]], list[dict[str, Any]], str], dict[str, A
 
 
 def run_agent(
-    session: Session, params: RushParams, scope: OrderScope, model: str, chat: ChatFn
+    session: Session,
+    params: RushParams,
+    scope: OrderScope,
+    model: str,
+    chat: ChatFn,
+    bound_tools: Tools | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
-    tools = Tools(session, params, scope)
+    tools = bound_tools if bound_tools is not None else Tools(session, params, scope)
     request = {
         "date": params.on_date.isoformat(),
         "weekday": params.on_date.strftime("%A"),
@@ -297,7 +312,21 @@ def run_agent(
     trace: list[dict[str, Any]] = []
     for _ in range(MAX_TURNS):
         message = chat(messages, TOOLS, model)
+        if not isinstance(message, dict):
+            raise AgentError("The model returned an invalid message")
         calls = message.get("tool_calls") or []
+        if not isinstance(calls, list):
+            raise AgentError("The model's tool_calls must be a list")
+        for call in calls:
+            function = call.get("function") if isinstance(call, dict) else None
+            if (
+                not isinstance(function, dict)
+                or not isinstance(call.get("id"), str)
+                or not call["id"]
+                or not isinstance(function.get("name"), str)
+                or not isinstance(function.get("arguments", "{}"), (str, type(None)))
+            ):
+                raise AgentError("The model returned an invalid tool call")
         messages.append(
             {"role": "assistant", "content": message.get("content") or "", "tool_calls": calls}
             if calls
@@ -335,12 +364,18 @@ def _normalize(
     """Snap agent windows to the grid, clamp multipliers, and recompute their numbers."""
     windows: list[tuple[int, int, dict[str, Any]]] = []
     for raw in decision["rush_hours"][:12]:
+        if not isinstance(raw, dict):
+            flags.append("ai_window_invalid: skipped a non-object rush window")
+            continue
         try:
             start = _to_minute(raw["start"], fc.slot_minutes, round_up=False)
             end = min(_to_minute(raw["end"], fc.slot_minutes, round_up=True), rush.DAY_MINUTES)
             asked = float(raw.get("multiplier", 1.0))
         except (KeyError, TypeError, ValueError):
             flags.append("ai_window_invalid: skipped a rush window with bad times or numbers")
+            continue
+        if not math.isfinite(asked):
+            flags.append("ai_window_invalid: skipped a non-finite multiplier")
             continue
         if start >= end:
             flags.append("ai_window_invalid: skipped a rush window that ends before it starts")
@@ -350,7 +385,11 @@ def _normalize(
             continue
         multiplier = min(MAX_MULTIPLIER, max(MIN_MULTIPLIER, asked))
         stats = fc.window_stats(start, end, multiplier)
-        if raw.get("confidence") in {"high", "medium", "low"}:
+        if isinstance(raw.get("confidence"), str) and raw["confidence"] in {
+            "high",
+            "medium",
+            "low",
+        }:
             stats["confidence"] = raw["confidence"]
         stats |= {
             "multiplier": multiplier,
@@ -372,13 +411,27 @@ def _baseline_reason(stats: dict[str, Any], fc: rush.Forecast) -> str:
 
 
 def predict_rush_hours(
-    session: Session, params: RushParams, chat: ChatFn | None = None
+    session: Session,
+    params: RushParams,
+    chat: ChatFn | None = None,
+    *,
+    forecast: rush.Forecast | None = None,
+    actual_traffic: dict | None = None,
+    bound_tools: Tools | None = None,
 ) -> dict[str, Any]:
     """Forecast the day's traffic, then let the agent refine the rush windows if it can."""
     scope = params.scope()
     slot = params.slot_minutes
-    fc = rush.forecast(session, scope, params.on_date, slot, params.weeks)
-    actual = rush.day_traffic(session, scope, params.on_date, slot)
+    fc = (
+        forecast
+        if forecast is not None
+        else rush.forecast(session, scope, params.on_date, slot, params.weeks)
+    )
+    actual = (
+        actual_traffic
+        if actual_traffic is not None
+        else rush.day_traffic(session, scope, params.on_date, slot)
+    )
     flags: list[str] = []
     trace: list[dict[str, Any]] = []
     key, model = _openrouter()
@@ -392,7 +445,7 @@ def predict_rush_hours(
         )
     if fc.history and params.use_agent and key:
         try:
-            decision, trace = run_agent(session, params, scope, model, chat or _chat)
+            decision, trace = run_agent(session, params, scope, model, chat or _chat, bound_tools)
             windows = _normalize(decision, fc, flags)
             method = "agent"
             summary = str(decision.get("summary") or "")[:1000]
