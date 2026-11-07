@@ -1,0 +1,1195 @@
+{
+  "is_synthetic": true,
+  "verified": true,
+  "date_start": "2026-05-01",
+  "date_end_inclusive": "2026-10-31",
+  "calendar_days": 184,
+  "totals": {
+    "stores": 4,
+    "orders": 45000,
+    "order_lines": 85651,
+    "quantity": "99440"
+  },
+  "checks": [
+    "All exported file hashes and row counts match the export manifest.",
+    "Every original CSV row is preserved exactly in exported source details.",
+    "Store-scoped order IDs, quantities, prices, local times and modifiers reconcile.",
+    "All records carrying a synthetic flag are synthetic; imports succeeded.",
+    "Observed platform item identities reconcile without inventing canonical mappings."
+  ],
+  "weekday_demand": [
+    {
+      "weekday": "Monday",
+      "calendar_days": 26,
+      "orders": 6324,
+      "orders_per_day": 243.23
+    },
+    {
+      "weekday": "Tuesday",
+      "calendar_days": 26,
+      "orders": 6362,
+      "orders_per_day": 244.69
+    },
+    {
+      "weekday": "Wednesday",
+      "calendar_days": 26,
+      "orders": 6563,
+      "orders_per_day": 252.42
+    },
+    {
+      "weekday": "Thursday",
+      "calendar_days": 26,
+      "orders": 6281,
+      "orders_per_day": 241.58
+    },
+    {
+      "weekday": "Friday",
+      "calendar_days": 27,
+      "orders": 6544,
+      "orders_per_day": 242.37
+    },
+    {
+      "weekday": "Saturday",
+      "calendar_days": 27,
+      "orders": 6639,
+      "orders_per_day": 245.89
+    },
+    {
+      "weekday": "Sunday",
+      "calendar_days": 26,
+      "orders": 6287,
+      "orders_per_day": 241.81
+    }
+  ],
+  "monthly_platform_and_fulfillment": [
+    {
+      "month": "2026-05",
+      "orders": 6498,
+      "orders_per_calendar_day": 209.61,
+      "doordash_orders": 4749,
+      "grubhub_orders": 1749,
+      "grubhub_share_pct": 26.92,
+      "delivery_share_pct": 77.13
+    },
+    {
+      "month": "2026-06",
+      "orders": 6709,
+      "orders_per_calendar_day": 223.63,
+      "doordash_orders": 4388,
+      "grubhub_orders": 2321,
+      "grubhub_share_pct": 34.6,
+      "delivery_share_pct": 76.46
+    },
+    {
+      "month": "2026-07",
+      "orders": 7303,
+      "orders_per_calendar_day": 235.58,
+      "doordash_orders": 4191,
+      "grubhub_orders": 3112,
+      "grubhub_share_pct": 42.61,
+      "delivery_share_pct": 75.67
+    },
+    {
+      "month": "2026-08",
+      "orders": 7983,
+      "orders_per_calendar_day": 257.52,
+      "doordash_orders": 3982,
+      "grubhub_orders": 4001,
+      "grubhub_share_pct": 50.12,
+      "delivery_share_pct": 75.69
+    },
+    {
+      "month": "2026-09",
+      "orders": 7966,
+      "orders_per_calendar_day": 265.53,
+      "doordash_orders": 3339,
+      "grubhub_orders": 4627,
+      "grubhub_share_pct": 58.08,
+      "delivery_share_pct": 75.3
+    },
+    {
+      "month": "2026-10",
+      "orders": 8541,
+      "orders_per_calendar_day": 275.52,
+      "doordash_orders": 2870,
+      "grubhub_orders": 5671,
+      "grubhub_share_pct": 66.4,
+      "delivery_share_pct": 76.2
+    }
+  ],
+  "platform_stores": [
+    {
+      "source": "doordash",
+      "external_store_id": "9900102",
+      "store_name": "Harbor Deli - Market (SYNTHETIC)",
+      "orders": 13224,
+      "orders_per_calendar_day": 71.87,
+      "weekday_orders_per_day": [
+        {
+          "weekday": "Monday",
+          "orders_per_day": 85.31
+        },
+        {
+          "weekday": "Tuesday",
+          "orders_per_day": 85.0
+        },
+        {
+          "weekday": "Wednesday",
+          "orders_per_day": 89.54
+        },
+        {
+          "weekday": "Thursday",
+          "orders_per_day": 81.35
+        },
+        {
+          "weekday": "Friday",
+          "orders_per_day": 82.37
+        },
+        {
+          "weekday": "Saturday",
+          "orders_per_day": 41.15
+        },
+        {
+          "weekday": "Sunday",
+          "orders_per_day": 39.15
+        }
+      ],
+      "orders_by_hour": [
+        {
+          "hour": 0,
+          "orders": 0
+        },
+        {
+          "hour": 1,
+          "orders": 0
+        },
+        {
+          "hour": 2,
+          "orders": 0
+        },
+        {
+          "hour": 3,
+          "orders": 0
+        },
+        {
+          "hour": 4,
+          "orders": 0
+        },
+        {
+          "hour": 5,
+          "orders": 0
+        },
+        {
+          "hour": 6,
+          "orders": 0
+        },
+        {
+          "hour": 7,
+          "orders": 0
+        },
+        {
+          "hour": 8,
+          "orders": 601
+        },
+        {
+          "hour": 9,
+          "orders": 619
+        },
+        {
+          "hour": 10,
+          "orders": 618
+        },
+        {
+          "hour": 11,
+          "orders": 2679
+        },
+        {
+          "hour": 12,
+          "orders": 2645
+        },
+        {
+          "hour": 13,
+          "orders": 2715
+        },
+        {
+          "hour": 14,
+          "orders": 392
+        },
+        {
+          "hour": 15,
+          "orders": 462
+        },
+        {
+          "hour": 16,
+          "orders": 413
+        },
+        {
+          "hour": 17,
+          "orders": 417
+        },
+        {
+          "hour": 18,
+          "orders": 423
+        },
+        {
+          "hour": 19,
+          "orders": 448
+        },
+        {
+          "hour": 20,
+          "orders": 424
+        },
+        {
+          "hour": 21,
+          "orders": 368
+        },
+        {
+          "hour": 22,
+          "orders": 0
+        },
+        {
+          "hour": 23,
+          "orders": 0
+        }
+      ]
+    },
+    {
+      "source": "grubhub",
+      "external_store_id": "8800102",
+      "store_name": "Harbor Deli - Market (SYNTHETIC)",
+      "orders": 10290,
+      "orders_per_calendar_day": 55.92,
+      "weekday_orders_per_day": [
+        {
+          "weekday": "Monday",
+          "orders_per_day": 64.35
+        },
+        {
+          "weekday": "Tuesday",
+          "orders_per_day": 68.42
+        },
+        {
+          "weekday": "Wednesday",
+          "orders_per_day": 65.62
+        },
+        {
+          "weekday": "Thursday",
+          "orders_per_day": 66.58
+        },
+        {
+          "weekday": "Friday",
+          "orders_per_day": 65.56
+        },
+        {
+          "weekday": "Saturday",
+          "orders_per_day": 31.04
+        },
+        {
+          "weekday": "Sunday",
+          "orders_per_day": 30.5
+        }
+      ],
+      "orders_by_hour": [
+        {
+          "hour": 0,
+          "orders": 0
+        },
+        {
+          "hour": 1,
+          "orders": 0
+        },
+        {
+          "hour": 2,
+          "orders": 0
+        },
+        {
+          "hour": 3,
+          "orders": 0
+        },
+        {
+          "hour": 4,
+          "orders": 0
+        },
+        {
+          "hour": 5,
+          "orders": 0
+        },
+        {
+          "hour": 6,
+          "orders": 0
+        },
+        {
+          "hour": 7,
+          "orders": 0
+        },
+        {
+          "hour": 8,
+          "orders": 469
+        },
+        {
+          "hour": 9,
+          "orders": 469
+        },
+        {
+          "hour": 10,
+          "orders": 488
+        },
+        {
+          "hour": 11,
+          "orders": 2047
+        },
+        {
+          "hour": 12,
+          "orders": 2061
+        },
+        {
+          "hour": 13,
+          "orders": 2011
+        },
+        {
+          "hour": 14,
+          "orders": 346
+        },
+        {
+          "hour": 15,
+          "orders": 358
+        },
+        {
+          "hour": 16,
+          "orders": 360
+        },
+        {
+          "hour": 17,
+          "orders": 323
+        },
+        {
+          "hour": 18,
+          "orders": 346
+        },
+        {
+          "hour": 19,
+          "orders": 345
+        },
+        {
+          "hour": 20,
+          "orders": 329
+        },
+        {
+          "hour": 21,
+          "orders": 338
+        },
+        {
+          "hour": 22,
+          "orders": 0
+        },
+        {
+          "hour": 23,
+          "orders": 0
+        }
+      ]
+    },
+    {
+      "source": "doordash",
+      "external_store_id": "9900101",
+      "store_name": "Harbor Deli - Uptown (SYNTHETIC)",
+      "orders": 10295,
+      "orders_per_calendar_day": 55.95,
+      "weekday_orders_per_day": [
+        {
+          "weekday": "Monday",
+          "orders_per_day": 45.62
+        },
+        {
+          "weekday": "Tuesday",
+          "orders_per_day": 44.42
+        },
+        {
+          "weekday": "Wednesday",
+          "orders_per_day": 45.77
+        },
+        {
+          "weekday": "Thursday",
+          "orders_per_day": 45.54
+        },
+        {
+          "weekday": "Friday",
+          "orders_per_day": 46.15
+        },
+        {
+          "weekday": "Saturday",
+          "orders_per_day": 79.56
+        },
+        {
+          "weekday": "Sunday",
+          "orders_per_day": 84.08
+        }
+      ],
+      "orders_by_hour": [
+        {
+          "hour": 0,
+          "orders": 0
+        },
+        {
+          "hour": 1,
+          "orders": 0
+        },
+        {
+          "hour": 2,
+          "orders": 0
+        },
+        {
+          "hour": 3,
+          "orders": 0
+        },
+        {
+          "hour": 4,
+          "orders": 0
+        },
+        {
+          "hour": 5,
+          "orders": 0
+        },
+        {
+          "hour": 6,
+          "orders": 0
+        },
+        {
+          "hour": 7,
+          "orders": 0
+        },
+        {
+          "hour": 8,
+          "orders": 478
+        },
+        {
+          "hour": 9,
+          "orders": 465
+        },
+        {
+          "hour": 10,
+          "orders": 491
+        },
+        {
+          "hour": 11,
+          "orders": 849
+        },
+        {
+          "hour": 12,
+          "orders": 773
+        },
+        {
+          "hour": 13,
+          "orders": 829
+        },
+        {
+          "hour": 14,
+          "orders": 281
+        },
+        {
+          "hour": 15,
+          "orders": 274
+        },
+        {
+          "hour": 16,
+          "orders": 267
+        },
+        {
+          "hour": 17,
+          "orders": 1158
+        },
+        {
+          "hour": 18,
+          "orders": 1079
+        },
+        {
+          "hour": 19,
+          "orders": 1148
+        },
+        {
+          "hour": 20,
+          "orders": 1071
+        },
+        {
+          "hour": 21,
+          "orders": 1132
+        },
+        {
+          "hour": 22,
+          "orders": 0
+        },
+        {
+          "hour": 23,
+          "orders": 0
+        }
+      ]
+    },
+    {
+      "source": "grubhub",
+      "external_store_id": "8800101",
+      "store_name": "Harbor Deli - Uptown (SYNTHETIC)",
+      "orders": 11191,
+      "orders_per_calendar_day": 60.82,
+      "weekday_orders_per_day": [
+        {
+          "weekday": "Monday",
+          "orders_per_day": 47.96
+        },
+        {
+          "weekday": "Tuesday",
+          "orders_per_day": 46.85
+        },
+        {
+          "weekday": "Wednesday",
+          "orders_per_day": 51.5
+        },
+        {
+          "weekday": "Thursday",
+          "orders_per_day": 48.12
+        },
+        {
+          "weekday": "Friday",
+          "orders_per_day": 48.3
+        },
+        {
+          "weekday": "Saturday",
+          "orders_per_day": 94.15
+        },
+        {
+          "weekday": "Sunday",
+          "orders_per_day": 88.08
+        }
+      ],
+      "orders_by_hour": [
+        {
+          "hour": 0,
+          "orders": 0
+        },
+        {
+          "hour": 1,
+          "orders": 0
+        },
+        {
+          "hour": 2,
+          "orders": 0
+        },
+        {
+          "hour": 3,
+          "orders": 0
+        },
+        {
+          "hour": 4,
+          "orders": 0
+        },
+        {
+          "hour": 5,
+          "orders": 0
+        },
+        {
+          "hour": 6,
+          "orders": 0
+        },
+        {
+          "hour": 7,
+          "orders": 0
+        },
+        {
+          "hour": 8,
+          "orders": 485
+        },
+        {
+          "hour": 9,
+          "orders": 506
+        },
+        {
+          "hour": 10,
+          "orders": 527
+        },
+        {
+          "hour": 11,
+          "orders": 879
+        },
+        {
+          "hour": 12,
+          "orders": 931
+        },
+        {
+          "hour": 13,
+          "orders": 849
+        },
+        {
+          "hour": 14,
+          "orders": 275
+        },
+        {
+          "hour": 15,
+          "orders": 294
+        },
+        {
+          "hour": 16,
+          "orders": 309
+        },
+        {
+          "hour": 17,
+          "orders": 1195
+        },
+        {
+          "hour": 18,
+          "orders": 1228
+        },
+        {
+          "hour": 19,
+          "orders": 1292
+        },
+        {
+          "hour": 20,
+          "orders": 1251
+        },
+        {
+          "hour": 21,
+          "orders": 1170
+        },
+        {
+          "hour": 22,
+          "orders": 0
+        },
+        {
+          "hour": 23,
+          "orders": 0
+        }
+      ]
+    }
+  ],
+  "item_mix_by_display_name": [
+    {
+      "item_name": "Breakfast Bagel",
+      "monthly": [
+        {
+          "month": "2026-05",
+          "units": "471",
+          "share_of_item_units_pct": 3.27
+        },
+        {
+          "month": "2026-06",
+          "units": "432",
+          "share_of_item_units_pct": 2.93
+        },
+        {
+          "month": "2026-07",
+          "units": "517",
+          "share_of_item_units_pct": 3.19
+        },
+        {
+          "month": "2026-08",
+          "units": "519",
+          "share_of_item_units_pct": 2.92
+        },
+        {
+          "month": "2026-09",
+          "units": "518",
+          "share_of_item_units_pct": 2.94
+        },
+        {
+          "month": "2026-10",
+          "units": "557",
+          "share_of_item_units_pct": 2.98
+        }
+      ]
+    },
+    {
+      "item_name": "Chicken Wrap",
+      "monthly": [
+        {
+          "month": "2026-05",
+          "units": "1294",
+          "share_of_item_units_pct": 8.98
+        },
+        {
+          "month": "2026-06",
+          "units": "1386",
+          "share_of_item_units_pct": 9.39
+        },
+        {
+          "month": "2026-07",
+          "units": "1504",
+          "share_of_item_units_pct": 9.28
+        },
+        {
+          "month": "2026-08",
+          "units": "1611",
+          "share_of_item_units_pct": 9.07
+        },
+        {
+          "month": "2026-09",
+          "units": "1579",
+          "share_of_item_units_pct": 8.96
+        },
+        {
+          "month": "2026-10",
+          "units": "1593",
+          "share_of_item_units_pct": 8.52
+        }
+      ]
+    },
+    {
+      "item_name": "Chocolate Cookie",
+      "monthly": [
+        {
+          "month": "2026-05",
+          "units": "764",
+          "share_of_item_units_pct": 5.3
+        },
+        {
+          "month": "2026-06",
+          "units": "768",
+          "share_of_item_units_pct": 5.21
+        },
+        {
+          "month": "2026-07",
+          "units": "855",
+          "share_of_item_units_pct": 5.28
+        },
+        {
+          "month": "2026-08",
+          "units": "918",
+          "share_of_item_units_pct": 5.17
+        },
+        {
+          "month": "2026-09",
+          "units": "901",
+          "share_of_item_units_pct": 5.11
+        },
+        {
+          "month": "2026-10",
+          "units": "1000",
+          "share_of_item_units_pct": 5.35
+        }
+      ]
+    },
+    {
+      "item_name": "Citrus Grain Bowl",
+      "monthly": [
+        {
+          "month": "2026-05",
+          "units": "494",
+          "share_of_item_units_pct": 3.43
+        },
+        {
+          "month": "2026-06",
+          "units": "1061",
+          "share_of_item_units_pct": 7.19
+        },
+        {
+          "month": "2026-07",
+          "units": "1740",
+          "share_of_item_units_pct": 10.74
+        },
+        {
+          "month": "2026-08",
+          "units": "2451",
+          "share_of_item_units_pct": 13.8
+        },
+        {
+          "month": "2026-09",
+          "units": "3216",
+          "share_of_item_units_pct": 18.24
+        },
+        {
+          "month": "2026-10",
+          "units": "3883",
+          "share_of_item_units_pct": 20.78
+        }
+      ]
+    },
+    {
+      "item_name": "Coffee",
+      "monthly": [
+        {
+          "month": "2026-05",
+          "units": "395",
+          "share_of_item_units_pct": 2.74
+        },
+        {
+          "month": "2026-06",
+          "units": "430",
+          "share_of_item_units_pct": 2.91
+        },
+        {
+          "month": "2026-07",
+          "units": "417",
+          "share_of_item_units_pct": 2.57
+        },
+        {
+          "month": "2026-08",
+          "units": "497",
+          "share_of_item_units_pct": 2.8
+        },
+        {
+          "month": "2026-09",
+          "units": "457",
+          "share_of_item_units_pct": 2.59
+        },
+        {
+          "month": "2026-10",
+          "units": "460",
+          "share_of_item_units_pct": 2.46
+        }
+      ]
+    },
+    {
+      "item_name": "Crispy Fries",
+      "monthly": [
+        {
+          "month": "2026-05",
+          "units": "1326",
+          "share_of_item_units_pct": 9.21
+        },
+        {
+          "month": "2026-06",
+          "units": "1358",
+          "share_of_item_units_pct": 9.2
+        },
+        {
+          "month": "2026-07",
+          "units": "1397",
+          "share_of_item_units_pct": 8.62
+        },
+        {
+          "month": "2026-08",
+          "units": "1578",
+          "share_of_item_units_pct": 8.89
+        },
+        {
+          "month": "2026-09",
+          "units": "1461",
+          "share_of_item_units_pct": 8.29
+        },
+        {
+          "month": "2026-10",
+          "units": "1663",
+          "share_of_item_units_pct": 8.9
+        }
+      ]
+    },
+    {
+      "item_name": "Fruit Cup",
+      "monthly": [
+        {
+          "month": "2026-05",
+          "units": "586",
+          "share_of_item_units_pct": 4.07
+        },
+        {
+          "month": "2026-06",
+          "units": "603",
+          "share_of_item_units_pct": 4.09
+        },
+        {
+          "month": "2026-07",
+          "units": "735",
+          "share_of_item_units_pct": 4.54
+        },
+        {
+          "month": "2026-08",
+          "units": "743",
+          "share_of_item_units_pct": 4.18
+        },
+        {
+          "month": "2026-09",
+          "units": "768",
+          "share_of_item_units_pct": 4.36
+        },
+        {
+          "month": "2026-10",
+          "units": "774",
+          "share_of_item_units_pct": 4.14
+        }
+      ]
+    },
+    {
+      "item_name": "Garden Salad",
+      "monthly": [
+        {
+          "month": "2026-05",
+          "units": "1017",
+          "share_of_item_units_pct": 7.06
+        },
+        {
+          "month": "2026-06",
+          "units": "1050",
+          "share_of_item_units_pct": 7.12
+        },
+        {
+          "month": "2026-07",
+          "units": "1068",
+          "share_of_item_units_pct": 6.59
+        },
+        {
+          "month": "2026-08",
+          "units": "1230",
+          "share_of_item_units_pct": 6.93
+        },
+        {
+          "month": "2026-09",
+          "units": "1249",
+          "share_of_item_units_pct": 7.08
+        },
+        {
+          "month": "2026-10",
+          "units": "1190",
+          "share_of_item_units_pct": 6.37
+        }
+      ]
+    },
+    {
+      "item_name": "Iced Tea",
+      "monthly": [
+        {
+          "month": "2026-05",
+          "units": "904",
+          "share_of_item_units_pct": 6.28
+        },
+        {
+          "month": "2026-06",
+          "units": "948",
+          "share_of_item_units_pct": 6.43
+        },
+        {
+          "month": "2026-07",
+          "units": "1012",
+          "share_of_item_units_pct": 6.25
+        },
+        {
+          "month": "2026-08",
+          "units": "1160",
+          "share_of_item_units_pct": 6.53
+        },
+        {
+          "month": "2026-09",
+          "units": "1100",
+          "share_of_item_units_pct": 6.24
+        },
+        {
+          "month": "2026-10",
+          "units": "1141",
+          "share_of_item_units_pct": 6.11
+        }
+      ]
+    },
+    {
+      "item_name": "Roast Beef Sandwich",
+      "monthly": [
+        {
+          "month": "2026-05",
+          "units": "2798",
+          "share_of_item_units_pct": 19.43
+        },
+        {
+          "month": "2026-06",
+          "units": "2432",
+          "share_of_item_units_pct": 16.48
+        },
+        {
+          "month": "2026-07",
+          "units": "2121",
+          "share_of_item_units_pct": 13.09
+        },
+        {
+          "month": "2026-08",
+          "units": "1883",
+          "share_of_item_units_pct": 10.6
+        },
+        {
+          "month": "2026-09",
+          "units": "1287",
+          "share_of_item_units_pct": 7.3
+        },
+        {
+          "month": "2026-10",
+          "units": "941",
+          "share_of_item_units_pct": 5.04
+        }
+      ]
+    },
+    {
+      "item_name": "Spicy Chicken Sandwich",
+      "monthly": [
+        {
+          "month": "2026-05",
+          "units": "1205",
+          "share_of_item_units_pct": 8.37
+        },
+        {
+          "month": "2026-06",
+          "units": "1134",
+          "share_of_item_units_pct": 7.69
+        },
+        {
+          "month": "2026-07",
+          "units": "1311",
+          "share_of_item_units_pct": 8.09
+        },
+        {
+          "month": "2026-08",
+          "units": "1391",
+          "share_of_item_units_pct": 7.83
+        },
+        {
+          "month": "2026-09",
+          "units": "1401",
+          "share_of_item_units_pct": 7.95
+        },
+        {
+          "month": "2026-10",
+          "units": "1498",
+          "share_of_item_units_pct": 8.02
+        }
+      ]
+    },
+    {
+      "item_name": "Tomato Soup",
+      "monthly": [
+        {
+          "month": "2026-05",
+          "units": "568",
+          "share_of_item_units_pct": 3.94
+        },
+        {
+          "month": "2026-06",
+          "units": "532",
+          "share_of_item_units_pct": 3.61
+        },
+        {
+          "month": "2026-07",
+          "units": "589",
+          "share_of_item_units_pct": 3.63
+        },
+        {
+          "month": "2026-08",
+          "units": "628",
+          "share_of_item_units_pct": 3.54
+        },
+        {
+          "month": "2026-09",
+          "units": "695",
+          "share_of_item_units_pct": 3.94
+        },
+        {
+          "month": "2026-10",
+          "units": "738",
+          "share_of_item_units_pct": 3.95
+        }
+      ]
+    },
+    {
+      "item_name": "Turkey Club",
+      "monthly": [
+        {
+          "month": "2026-05",
+          "units": "1416",
+          "share_of_item_units_pct": 9.83
+        },
+        {
+          "month": "2026-06",
+          "units": "1424",
+          "share_of_item_units_pct": 9.65
+        },
+        {
+          "month": "2026-07",
+          "units": "1632",
+          "share_of_item_units_pct": 10.07
+        },
+        {
+          "month": "2026-08",
+          "units": "1670",
+          "share_of_item_units_pct": 9.4
+        },
+        {
+          "month": "2026-09",
+          "units": "1635",
+          "share_of_item_units_pct": 9.27
+        },
+        {
+          "month": "2026-10",
+          "units": "1772",
+          "share_of_item_units_pct": 9.48
+        }
+      ]
+    },
+    {
+      "item_name": "Veggie Wrap",
+      "monthly": [
+        {
+          "month": "2026-05",
+          "units": "823",
+          "share_of_item_units_pct": 5.71
+        },
+        {
+          "month": "2026-06",
+          "units": "904",
+          "share_of_item_units_pct": 6.13
+        },
+        {
+          "month": "2026-07",
+          "units": "986",
+          "share_of_item_units_pct": 6.08
+        },
+        {
+          "month": "2026-08",
+          "units": "1062",
+          "share_of_item_units_pct": 5.98
+        },
+        {
+          "month": "2026-09",
+          "units": "997",
+          "share_of_item_units_pct": 5.65
+        },
+        {
+          "month": "2026-10",
+          "units": "1070",
+          "share_of_item_units_pct": 5.73
+        }
+      ]
+    },
+    {
+      "item_name": "Weekend Pancakes",
+      "monthly": [
+        {
+          "month": "2026-05",
+          "units": "342",
+          "share_of_item_units_pct": 2.37
+        },
+        {
+          "month": "2026-06",
+          "units": "291",
+          "share_of_item_units_pct": 1.97
+        },
+        {
+          "month": "2026-07",
+          "units": "320",
+          "share_of_item_units_pct": 1.97
+        },
+        {
+          "month": "2026-08",
+          "units": "419",
+          "share_of_item_units_pct": 2.36
+        },
+        {
+          "month": "2026-09",
+          "units": "367",
+          "share_of_item_units_pct": 2.08
+        },
+        {
+          "month": "2026-10",
+          "units": "409",
+          "share_of_item_units_pct": 2.19
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Synthetic designed patterns support demos, not real-world accuracy claims.",
+    "Calendar-day rates include all dates in the observed range; they do not establish store opening hours or report completeness.",
+    "Item display-name grouping is an analysis convenience, not an approved cross-platform identity mapping.",
+    "No recipe, inventory, stockout, staffing, weather, or event evidence is present."
+  ]
+}

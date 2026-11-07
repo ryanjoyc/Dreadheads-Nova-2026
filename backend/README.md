@@ -4,6 +4,10 @@ Local Python 3.12 / FastAPI / PostgreSQL 17 backend for synthetic DoorDash and G
 
 This backend serves observed sales records. It does not calculate forecasts, ingredient needs, or inventory, and does not implement the recommendation endpoints or connect the prep wireframe.
 
+For a second large sales-only scenario, see [Harbor Deli synthetic reports and verified API exports](../data/sales_only_demo/README.md). It contains 45,000 orders with changing channel mix, dish trends, and location-specific demand patterns, using only the supported sales fields.
+
+For the October food-truck scenario, see [K-Station / Tartan Express](../data/kstation_demo/README.md). Its combined DoorDash/Grubhub orders demonstrate repeated meal rushes, a Thursday afternoon rush, and a single isolated spike. Menu inspiration is attributed to CMU; all orders and demand assumptions are synthetic.
+
 ## Start the backend
 
 Run these commands from `backend/`:

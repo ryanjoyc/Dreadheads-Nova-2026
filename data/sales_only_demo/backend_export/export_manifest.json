@@ -1,0 +1,47 @@
+{
+  "base_url": "http://api:8000",
+  "files": {
+    "imports.jsonl.gz": {
+      "bytes": 610,
+      "rows": 2,
+      "sha256": "2bdd8a54f1f532f31d35eaf072b82d24867d1a3d5ee6c1f22ed45da7cc432a13"
+    },
+    "items.jsonl.gz": {
+      "bytes": 1375,
+      "rows": 60,
+      "sha256": "043b5591066a3c6d3650970bfe48ed3a4b03e81bd8ffeea4a5aff0a54658b3d9"
+    },
+    "order_lines.jsonl.gz": {
+      "bytes": 11383934,
+      "rows": 85651,
+      "sha256": "6989de31760c06bbb2c7034f7ccedec70b60bb284e6234702028fbbabbf75d8c"
+    },
+    "orders.jsonl.gz": {
+      "bytes": 3103814,
+      "rows": 45000,
+      "sha256": "4357de851318e07f889bc20f5a887f778a158b43c28c0ade95a8cadf940dfc9b"
+    },
+    "stores.jsonl.gz": {
+      "bytes": 398,
+      "rows": 4,
+      "sha256": "1c8bb6f58981d741617253f69dbb3e17b69348a06699f8549ee4bc38a2544910"
+    }
+  },
+  "is_synthetic": true,
+  "note": "API exports only; no recipes, inventory, operational logs, or real credentials.",
+  "stores": [
+    "doordash:9900101",
+    "doordash:9900102",
+    "grubhub:8800101",
+    "grubhub:8800102"
+  ],
+  "totals": {
+    "order_lines": 85651,
+    "orders": 45000,
+    "orders_by_source": {
+      "doordash": 23519,
+      "grubhub": 21481
+    },
+    "quantity": "99440"
+  }
+}

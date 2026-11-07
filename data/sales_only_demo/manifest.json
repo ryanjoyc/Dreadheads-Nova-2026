@@ -1,0 +1,99 @@
+{
+  "dataset": "synthetic-demo-v1",
+  "is_synthetic": true,
+  "seed": 20261107,
+  "orders": 45000,
+  "date_start": "2026-05-01",
+  "date_end_inclusive": "2026-10-31",
+  "timezone": "America/New_York",
+  "sources": {
+    "doordash": {
+      "orders": 23519,
+      "lines": 44967,
+      "quantity": 52187,
+      "path": "platform_reports/doordash_order_detail.csv",
+      "sha256": "fb83cf6d5b5b5d136027960ae0449282477d2cff1666b9afed829907adaa3b63",
+      "store_ids": [
+        "9900101",
+        "9900102"
+      ],
+      "observed_date_start": "2026-05-01",
+      "observed_date_end": "2026-10-31",
+      "columns": [
+        "business_id",
+        "store_id",
+        "business_name",
+        "store_name",
+        "dd_order_number",
+        "order_place_date",
+        "order_place_time",
+        "created_at",
+        "timezone",
+        "dd_item_id",
+        "item_merchant_supplied_id",
+        "order_item_id",
+        "item_name",
+        "category_name",
+        "menu_name",
+        "order_item_quantity",
+        "unit_price",
+        "original_item_price",
+        "subtotal",
+        "is_consumer_pickup",
+        "dashpass",
+        "mx_order_number",
+        "external_order_id"
+      ]
+    },
+    "grubhub": {
+      "orders": 21481,
+      "lines": 40684,
+      "quantity": 47253,
+      "path": "platform_reports/grubhub_menu_line_items.csv",
+      "sha256": "8263697e4efb1a861e7e81075023aba51008cf2dea58750488cd9115b8809d96",
+      "store_ids": [
+        "8800101",
+        "8800102"
+      ],
+      "observed_date_start": "2026-05-01",
+      "observed_date_end": "2026-10-31",
+      "columns": [
+        "grubhub_store_id",
+        "store_name",
+        "store_number",
+        "external_id",
+        "order_number",
+        "order_uuid",
+        "partner_order_id",
+        "order_date",
+        "order_time_local",
+        "order_time_zone",
+        "menu_item_id",
+        "menu_item_name",
+        "menu_item_category_name",
+        "menu_item_quantity",
+        "menu_item_price",
+        "menu_item_modifiers",
+        "fullfillment_type"
+      ]
+    }
+  },
+  "designed_patterns": [
+    "Market weekday lunch concentration; Uptown dinner concentration",
+    "Uptown weekends stronger; Market weekdays stronger",
+    "Citrus Grain Bowl rising; Roast Beef Sandwich declining over six months",
+    "Grubhub order share rises from early to late months",
+    "Weekend Pancakes concentrate in weekend mornings",
+    "Pickup share is lower in evening orders"
+  ],
+  "assumptions": [
+    "All data is fabricated; no provider accounts or APIs were contacted.",
+    "Only documented report columns consumed by the current backend are written.",
+    "Prices are USD decimals; synthetic DoorDash unit_price includes add-on upcharges.",
+    "Synthetic Grubhub menu_item_price is the base price and modifiers are a JSON array.",
+    "No recipes, inventory, operating logs, weather/event claims, or inferred costs.",
+    "Both sources contain complete orders; no cancellations, refunds, or scheduled orders.",
+    "Placement dates/times use America/New_York; created_at is UTC.",
+    "No actual-export compatibility or predictive-accuracy guarantee is implied."
+  ]
+}
