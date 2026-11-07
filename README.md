@@ -8,3 +8,5 @@ See [hackathon context](docs/hackathon-context.md) for rules, schedule, submissi
 - [Restaurant API data](handoffs/restaurant-api-data-handoff.md) — DoorDash and Grubhub order fields
 
 Open [wireframes/prep.html](wireframes/prep.html) in a browser for the working prep tablet. Variations live at the top of that file.
+
+The [sales backend](backend/README.md) runs locally with FastAPI and PostgreSQL through Docker Compose. It imports synthetic DoorDash/Grubhub CSVs and exposes five read endpoints for analytics development.
