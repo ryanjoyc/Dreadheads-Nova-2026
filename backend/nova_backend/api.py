@@ -9,21 +9,25 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
-from nova_backend import queries
+from nova_backend import analytics, queries
 from nova_backend.config import get_settings
 from nova_backend.db import get_session
 from nova_backend.pagination import InvalidCursor
 from nova_backend.schemas import (
+    FilteredOrderOut,
     ImportOut,
     ImportParams,
     ItemOut,
     ItemParams,
+    OrderFilterParams,
     OrderLineOut,
     OrderOut,
     Page,
     SaleParams,
     StoreOut,
     StoreParams,
+    TopDishesOut,
+    TopDishParams,
 )
 
 logger = logging.getLogger(__name__)
@@ -80,6 +84,18 @@ def stores(params: Annotated[StoreParams, Query()], session: SessionDependency):
 @app.get("/orders", response_model=Page[OrderOut])
 def orders(params: Annotated[SaleParams, Query()], session: SessionDependency):
     return queries.list_orders(session, params)
+
+
+@app.get("/orders/filter", response_model=Page[FilteredOrderOut])
+def filter_orders(params: Annotated[OrderFilterParams, Query()], session: SessionDependency):
+    """Orders by store, date or date range, time of day, and dish name, oldest first."""
+    return analytics.filter_orders(session, params)
+
+
+@app.get("/dishes/top", response_model=TopDishesOut)
+def top_dishes(params: Annotated[TopDishParams, Query()], session: SessionDependency):
+    """The most frequently ordered dishes in a period, ranked by units sold."""
+    return analytics.top_dishes(session, params)
 
 
 @app.get("/order-lines", response_model=Page[OrderLineOut])

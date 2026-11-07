@@ -1,4 +1,4 @@
-"""Exercise all five running read endpoints without needing database credentials."""
+"""Exercise the running read endpoints without needing database credentials."""
 
 import json
 import sys
@@ -14,11 +14,24 @@ def main():
         assert "next_cursor" in result, endpoint
         assert result["data"], f"{endpoint}: seed fixtures before smoke testing"
         print(f"PASS GET /{endpoint}: {len(result['data'])} records")
+    for endpoint in ("orders/filter", "dishes/top"):
+        with urlopen(f"{base}/{endpoint}?limit=2", timeout=10) as response:
+            result = json.load(response)
+        assert result["data"], f"{endpoint}: seed fixtures before smoke testing"
+        print(f"PASS GET /{endpoint}: {len(result['data'])} records")
     with urlopen(f"{base}/openapi.json", timeout=10) as response:
         schema = json.load(response)
     assert all(
         f"/{name}" in schema["paths"]
-        for name in ("stores", "orders", "order-lines", "items", "imports")
+        for name in (
+            "stores",
+            "orders",
+            "order-lines",
+            "items",
+            "imports",
+            "orders/filter",
+            "dishes/top",
+        )
     )
     with urlopen(f"{base}/docs", timeout=10) as response:
         assert response.status == 200

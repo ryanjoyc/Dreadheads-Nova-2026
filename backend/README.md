@@ -2,7 +2,7 @@
 
 Local Python 3.12 / FastAPI / PostgreSQL 17 backend for synthetic DoorDash and Grubhub reports. Docker Compose is the only required host runtime. No provider credentials are needed.
 
-This backend serves observed sales records. It does not calculate forecasts, ingredient needs, or inventory, and does not implement the recommendation endpoints or connect the prep wireframe.
+This backend serves observed sales records, plus two summaries built from them (order search and top dishes). It does not calculate forecasts, ingredient needs, or inventory, and does not implement the recommendation endpoints or connect the prep wireframe.
 
 ## Start the backend
 
@@ -68,6 +68,25 @@ All five endpoints accept `limit` (default 100, maximum 500) and `cursor`. Respo
 Prices are decimal strings or null. Whole-number quantities are JSON integers; fractional quantities are decimal strings to preserve precision. Local timestamps have no UTC offset and are paired with their source timezone. Ambiguous local times are preserved with a warning; nonexistent local times fail validation. No absolute timestamp is guessed.
 
 Every order/line carries its source and import provenance, including synthetic status. Count distinct internal order IDs for order volume; sum line quantities for dish volume. Never sum repeated raw subtotals across lines. Grubhub subtotals and unconfirmed DoorDash modifiers stay null.
+
+## Search orders and rank dishes
+
+```sh
+curl 'http://127.0.0.1:8000/orders/filter?store_name=strip&date=2026-05-01&time_start=11:00&time_end=13:00&item_name=burger'
+curl 'http://127.0.0.1:8000/dishes/top?limit=5&date_start=2026-05-01&date_end=2026-06-01'
+```
+
+| Endpoint | Filters | Meaning |
+| --- | --- | --- |
+| `/orders/filter` | `store_id`, `store_name`, `source`, `date` or `date_start`/`date_end`, `time_start`/`time_end`, `item_name` | Matching orders, oldest first, each with all of its items. Paged with `limit`/`cursor` |
+| `/dishes/top` | `limit` (number of dishes, default 10, max 100), plus every filter above except `item_name` | Dishes ranked by units sold, then order count, then name |
+
+Both endpoints read through `queries.list_stores` and `queries.list_order_lines`, the functions behind `/stores` and `/order-lines`, in `nova_backend/analytics.py`. They page through every matching line, so prefer a date range on the full dataset.
+
+- `store_name` and `item_name` are case-insensitive substring matches; `store_name=Craig St` covers that store on both platforms.
+- `date` is one store-local day. It cannot be combined with `date_start`/`date_end`.
+- `time_start`/`time_end` are store-local times of day, start inclusive and end exclusive. A start after the end crosses midnight, so `time_start=22:00&time_end=02:00` means late night.
+- `/dishes/top` groups dishes by exact item name across platforms and stores. It reports `units` (summed quantities) and `orders` (distinct orders), and echoes the date range it used.
 
 There is no automatic cross-platform restaurant or dish mapping. The feeds share a schema while retaining separate source identities. Analytics may reuse query functions under `nova_backend.queries` inside trusted Python code, or consume these endpoints.
 
