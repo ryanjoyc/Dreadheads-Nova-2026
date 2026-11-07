@@ -115,4 +115,12 @@ def test_cursor_cannot_cross_endpoint_or_filters(client):
 def test_documentation_and_openapi(client):
     assert client.get("/docs").status_code == 200
     schema = client.get("/openapi.json").json()
-    assert set(schema["paths"]) == {"/stores", "/orders", "/order-lines", "/items", "/imports"}
+    assert set(schema["paths"]) == {
+        "/stores",
+        "/orders",
+        "/orders/filter",
+        "/order-lines",
+        "/items",
+        "/imports",
+        "/dishes/top",
+    }

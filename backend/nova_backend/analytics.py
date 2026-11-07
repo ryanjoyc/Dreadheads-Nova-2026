@@ -17,7 +17,13 @@ from sqlalchemy.orm import Session
 
 from nova_backend import queries
 from nova_backend.pagination import InvalidCursor, decode_cursor, encode_cursor
-from nova_backend.schemas import OrderFilterParams, SaleParams, StoreParams, TopDishParams
+from nova_backend.schemas import (
+    OrderFilterParams,
+    OrderScope,
+    SaleParams,
+    StoreParams,
+    TopDishParams,
+)
 
 PAGE = 500  # The read endpoints' maximum page size.
 
@@ -32,7 +38,7 @@ def _pages(fetch: Any, params: Any) -> Iterator[dict[str, Any]]:
         params = params.model_copy(update={"cursor": page["next_cursor"]})
 
 
-def _store_names(session: Session, params: OrderFilterParams | TopDishParams) -> dict[UUID, str]:
+def _store_names(session: Session, params: OrderScope) -> dict[UUID, str]:
     stores = _pages(
         lambda p: queries.list_stores(session, p),
         StoreParams(source=params.source, limit=PAGE),
@@ -47,8 +53,8 @@ def _in_time_window(placed: datetime, start: time | None, end: time | None) -> b
     return (start is None or clock >= start) and (end is None or clock < end)
 
 
-def _scoped_lines(
-    session: Session, params: OrderFilterParams | TopDishParams
+def scoped_lines(
+    session: Session, params: OrderScope
 ) -> Iterator[tuple[dict[str, Any], str]]:
     """Order lines from /order-lines filters, narrowed by store name and time of day."""
     names = _store_names(session, params)
@@ -72,7 +78,7 @@ def _scoped_lines(
 def filter_orders(session: Session, params: OrderFilterParams) -> dict[str, Any]:
     """Orders matching store, period, time of day, and dish name, oldest first."""
     orders: dict[UUID, dict[str, Any]] = {}
-    for line, store_name in _scoped_lines(session, params):
+    for line, store_name in scoped_lines(session, params):
         order = orders.get(line["order_id"])
         if order is None:
             order = orders[line["order_id"]] = {
@@ -129,7 +135,7 @@ def top_dishes(session: Session, params: TopDishParams) -> dict[str, Any]:
     units: dict[str, Decimal] = defaultdict(Decimal)
     orders: dict[str, set[UUID]] = defaultdict(set)
     categories: dict[str, str | None] = {}
-    for line, _store_name in _scoped_lines(session, params):
+    for line, _store_name in scoped_lines(session, params):
         name = line["item_name"]
         units[name] += line["quantity"]
         orders[name].add(line["order_id"])

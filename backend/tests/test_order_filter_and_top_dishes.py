@@ -45,7 +45,7 @@ def test_filter_pages_all_orders_oldest_first_with_items(client):
     times = [row["placed_at_local"] for row in rows]
     assert times == sorted(times)
     assert sum(len(row["items"]) for row in rows) == 21
-    basket = next(row for row in rows if row["external_order_id"] == "009896B6")
+    basket = next(row for row in rows if row["order_number"] == "009896B6")
     assert {item["item_name"] for item in basket["items"]} == {
         "Chicken Tender Basket",
         "Chicken Burrito",
@@ -55,7 +55,7 @@ def test_filter_pages_all_orders_oldest_first_with_items(client):
 
 def test_filter_by_meal_name_is_case_insensitive_substring(client):
     rows = search(client, item_name="smash burger")
-    assert {row["external_order_id"] for row in rows} == {
+    assert {row["order_number"] for row in rows} == {
         "009896B6",
         "50000077",
         "50198956",
@@ -74,11 +74,11 @@ def test_filter_by_store_date_and_time_of_day(client):
     assert len(window) == 5
     assert all("11:00:00" <= row["placed_at_local"][11:] < "11:15:00" for row in window)
     overnight = search(client, time_start="23:00", time_end="11:00")
-    assert [row["external_order_id"] for row in overnight] == ["00989694"]
+    assert [row["order_number"] for row in overnight] == ["00989694"]
     combined = search(
         client, store_name="craig", item_name="burger", date="2026-05-01", time_end="11:30"
     )
-    assert [row["external_order_id"] for row in combined] == ["009896B6"]
+    assert [row["order_number"] for row in combined] == ["009896B6"]
 
 
 @pytest.mark.parametrize(

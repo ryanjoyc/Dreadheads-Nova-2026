@@ -40,7 +40,7 @@ class SaleParams(ItemParams):
         return self
 
 
-class _OrderScope(BaseModel):
+class OrderScope(BaseModel):
     """Store, period, and time-of-day filters shared by order search and dish ranking."""
 
     source: Source | None = None
@@ -65,14 +65,14 @@ class _OrderScope(BaseModel):
         return self
 
 
-class OrderFilterParams(_OrderScope, PageParams):
+class OrderFilterParams(OrderScope, PageParams):
     item_name: str | None = Field(default=None, min_length=1, max_length=200)
 
     def filters(self) -> dict[str, Any]:
         return self.model_dump(mode="json", exclude={"limit", "cursor", "on_date"})
 
 
-class TopDishParams(_OrderScope):
+class TopDishParams(OrderScope):
     limit: int = Field(default=10, ge=1, le=100)
 
 
