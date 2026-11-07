@@ -1,0 +1,37 @@
+{
+  "is_synthetic": true,
+  "scope": "Local run evidence; no credentials or real merchant records used.",
+  "prior_records_unchanged": true,
+  "prior_tables": {
+    "stores": {
+      "rows": 8,
+      "before_and_after_row_digest": "a114dddfc90b43d8ea86d19d2904246a"
+    },
+    "orders": {
+      "rows": 45012,
+      "before_and_after_row_digest": "83481937d0cd5a6f4deefeffcf6b197e"
+    },
+    "lines": {
+      "rows": 85672,
+      "before_and_after_row_digest": "ef2973b9aa11c8da127d90f74e8dde1b"
+    }
+  },
+  "prior_import_audit_rows_unchanged": 4,
+  "harbor_deli_files_unchanged": 12,
+  "repeat_import": {
+    "order_count": 17939,
+    "stable_order_id_digest": "1054e6615f47152ca104e67ff89971e5",
+    "both_sources_reimported": true
+  },
+  "api_export_reconciled": true,
+  "verified_counts": {
+    "stores": 2,
+    "orders": 17939,
+    "order_lines": 30109,
+    "quantity": "33419"
+  },
+  "tests": {
+    "passed": 73,
+    "warning": "One upstream Starlette test-client deprecation warning"
+  }
+}
