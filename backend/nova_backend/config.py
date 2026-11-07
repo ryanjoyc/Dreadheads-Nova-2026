@@ -15,6 +15,8 @@ class Settings:
     database_url: str
     raw_storage_path: Path
     cors_origins: list[str]
+    openrouter_key: str | None = None
+    openrouter_model: str = "anthropic/claude-sonnet-5.5"
 
 
 @lru_cache
@@ -51,4 +53,7 @@ def get_settings() -> Settings:
         database_url=database_url,
         raw_storage_path=Path(os.getenv("RAW_STORAGE_PATH", "/raw")),
         cors_origins=origins,
+        # The Tech Guide's setup writes OPENROUTER_KEY; its sample code reads OPENROUTER_API_KEY.
+        openrouter_key=os.getenv("OPENROUTER_KEY") or os.getenv("OPENROUTER_API_KEY") or None,
+        openrouter_model=os.getenv("OPENROUTER_MODEL") or "anthropic/claude-sonnet-5.5",
     )

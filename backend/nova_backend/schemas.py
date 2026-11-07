@@ -207,3 +207,84 @@ class TopDishesOut(BaseModel):
     date_start: date | None
     date_end: date | None
     data: list[DishRankOut]
+
+
+Confidence = Literal["high", "medium", "low"]
+
+
+class RushParams(BaseModel):
+    on_date: date = Field(alias="date", description="Store-local day to predict")
+    from_time: time = Field(
+        default=time(0, 0),
+        alias="time",
+        description="Current store-local time; only rushes underway or still to come are returned",
+    )
+    until: time | None = Field(default=None, description="Ignore rushes starting at or after this")
+    source: Source | None = None
+    store_id: UUID | None = None
+    store_name: str | None = Field(default=None, min_length=1, max_length=200)
+    context: str | None = Field(
+        default=None,
+        max_length=500,
+        description="What the manager knows about the day, e.g. 'home football game at 1pm'",
+    )
+    weeks: int = Field(default=8, ge=1, le=26, description="Same-weekday history to average")
+    slot_minutes: Literal[15, 30, 60] = 15
+    use_agent: bool = True
+
+    @model_validator(mode="after")
+    def validate_window(self) -> "RushParams":
+        if self.until and self.until <= self.from_time:
+            raise ValueError("until must be after time")
+        return self
+
+    def scope(self) -> OrderScope:
+        return OrderScope(source=self.source, store_id=self.store_id, store_name=self.store_name)
+
+
+class RushWindowOut(BaseModel):
+    start: str
+    end: str
+    peak_at: str
+    status: Literal["in_progress", "upcoming"]
+    minutes_until: int
+    expected_orders: float
+    expected_peak_orders: float
+    intensity: float = Field(description="Peak slot vs a typical active slot")
+    consistency: float = Field(description="Share of history days that were busy in this window")
+    confidence: Confidence
+    multiplier: float = Field(description="Agent adjustment applied to the forecast, 0.5-2.0")
+    clamped_from: float | None
+    actual_orders: int | None = Field(description="Real orders in the window, if already recorded")
+    reason: str
+
+
+class RushSlotOut(BaseModel):
+    start: str
+    expected_orders: float
+    actual_orders: int | None
+    is_rush: bool
+
+
+class AgentStepOut(BaseModel):
+    tool: str
+    args: dict[str, Any]
+    result: str
+
+
+class RushHoursOut(BaseModel):
+    date: date
+    weekday: str
+    time: time
+    until: time | None
+    slot_minutes: int
+    method: Literal["agent", "baseline"]
+    model: str | None
+    history_days: list[date]
+    typical_orders_per_slot: float
+    rush_threshold: float
+    rush_hours: list[RushWindowOut]
+    slots: list[RushSlotOut]
+    summary: str
+    flags: list[str]
+    agent_trace: list[AgentStepOut]
