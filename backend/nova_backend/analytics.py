@@ -53,10 +53,11 @@ def _in_time_window(placed: datetime, start: time | None, end: time | None) -> b
     return (start is None or clock >= start) and (end is None or clock < end)
 
 
-def scoped_lines(
-    session: Session, params: OrderScope
-) -> Iterator[tuple[dict[str, Any], str]]:
-    """Order lines from /order-lines filters, narrowed by store name and time of day."""
+def scoped_lines(session: Session, params: OrderScope) -> Iterator[tuple[dict[str, Any], str]]:
+    """Order lines from /order-lines filters, narrowed by store name and time of day.
+
+    Params with exact `start`/`end` moments (TopDishParams) are narrowed to those too.
+    """
     names = _store_names(session, params)
     wanted = params.store_name.casefold() if params.store_name else None
     allowed = {sid for sid, name in names.items() if wanted is None or wanted in name.casefold()}
@@ -70,7 +71,11 @@ def scoped_lines(
     for line in _pages(lambda p: queries.list_order_lines(session, p), sale_params):
         if line["store_id"] not in allowed:
             continue
-        if not _in_time_window(line["placed_at_local"], params.time_start, params.time_end):
+        placed = line["placed_at_local"]
+        if not _in_time_window(placed, params.time_start, params.time_end):
+            continue
+        start, end = getattr(params, "start", None), getattr(params, "end", None)
+        if (start and placed < start) or (end and placed >= end):
             continue
         yield line, names[line["store_id"]]
 
@@ -145,6 +150,8 @@ def top_dishes(session: Session, params: TopDishParams) -> dict[str, Any]:
     return {
         "date_start": params.date_start,
         "date_end": params.date_end,
+        "start": params.start,
+        "end": params.end,
         "data": [
             {
                 "rank": rank,

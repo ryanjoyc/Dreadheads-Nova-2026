@@ -74,6 +74,25 @@ class OrderFilterParams(OrderScope, PageParams):
 
 class TopDishParams(OrderScope):
     limit: int = Field(default=10, ge=1, le=100)
+    start: datetime | None = Field(
+        default=None, description="Exact store-local start, e.g. 2026-05-01T11:00 (inclusive)"
+    )
+    end: datetime | None = Field(
+        default=None, description="Exact store-local end, e.g. 2026-05-01T13:30 (exclusive)"
+    )
+
+    @model_validator(mode="after")
+    def validate_moments(self) -> "TopDishParams":
+        if self.start is None and self.end is None:
+            return self
+        if self.on_date or self.date_start or self.date_end:
+            raise ValueError("Use start/end, or date/date_start/date_end, not both")
+        if self.start and self.end and self.start >= self.end:
+            raise ValueError("end must be after start")
+        # Narrow the /order-lines read to the days involved; exact moments filter after.
+        self.date_start = self.start.date() if self.start else None
+        self.date_end = self.end.date() + timedelta(days=1) if self.end else None
+        return self
 
 
 class ImportParams(StoreParams):
@@ -206,6 +225,8 @@ class DishRankOut(BaseModel):
 class TopDishesOut(BaseModel):
     date_start: date | None
     date_end: date | None
+    start: datetime | None
+    end: datetime | None
     data: list[DishRankOut]
 
 
@@ -229,11 +250,13 @@ class RushParams(BaseModel):
         description="What the manager knows about the day, e.g. 'home football game at 1pm'",
     )
     weeks: int = Field(default=8, ge=1, le=26, description="Same-weekday history to average")
-    slot_minutes: Literal[15, 30, 60] = 15
+    slot_minutes: int = Field(default=15, description="15, 30, or 60")
     use_agent: bool = True
 
     @model_validator(mode="after")
     def validate_window(self) -> "RushParams":
+        if self.slot_minutes not in (15, 30, 60):
+            raise ValueError("slot_minutes must be 15, 30, or 60")
         if self.until and self.until <= self.from_time:
             raise ValueError("until must be after time")
         return self

@@ -30,7 +30,9 @@ def minute_of(value: time) -> int:
     return value.hour * 60 + value.minute
 
 
-def day_traffic(session: Session, scope: OrderScope, day: date, slot_minutes: int) -> dict[int, int]:
+def day_traffic(
+    session: Session, scope: OrderScope, day: date, slot_minutes: int
+) -> dict[int, int]:
     """Distinct orders per slot on one store-local day, keyed by the slot's start minute."""
     params = scope.model_copy(
         update={
@@ -41,7 +43,9 @@ def day_traffic(session: Session, scope: OrderScope, day: date, slot_minutes: in
             "time_end": None,
         }
     )
-    placed = {line["order_id"]: line["placed_at_local"] for line, _ in scoped_lines(session, params)}
+    placed = {
+        line["order_id"]: line["placed_at_local"] for line, _ in scoped_lines(session, params)
+    }
     counts: dict[int, int] = defaultdict(int)
     for moment in placed.values():
         minute = moment.hour * 60 + moment.minute
@@ -64,7 +68,9 @@ class Forecast:
         peak = max(range(len(slots)), key=expected.__getitem__)
         busy_bar = self.typical * len(slots) * BUSY_DAY_RATIO
         busy_days = sum(
-            1 for counts in self.history.values() if sum(counts.get(s, 0) for s in slots) >= busy_bar
+            1
+            for counts in self.history.values()
+            if sum(counts.get(s, 0) for s in slots) >= busy_bar
         )
         consistency = busy_days / len(self.history) if self.history else 0.0
         if len(self.history) < 3:
