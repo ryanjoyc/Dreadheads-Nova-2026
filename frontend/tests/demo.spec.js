@@ -13,7 +13,7 @@ async function settings(page) {
 test("real sales fill Kurt's rush-first tablet and time horizons", async ({page}) => {
   await page.goto("/"); await loaded(page);
   await expect(page.getByRole("region", {name:"Lunch rush",exact:true})).toContainText("Tangy Fried Chicken Rice Bowl");
-  await expect(page.getByRole("heading", {name:"Lunch rush · 12:15–12:45",exact:true})).toBeVisible();
+  await expect(page.getByRole("heading", {name:"Lunch rush · 12:15–12:45 PM",exact:true})).toBeVisible();
   await expect(page.getByRole("button",{name:"Load day",exact:true})).not.toBeVisible();
   await expect(page.locator("svg")).toHaveCount(0);
   await page.getByRole("button", {name:"Rest of today",exact:true}).click(); await loaded(page);
@@ -62,14 +62,14 @@ test("tablet fits narrow screens and captures the connected demo", async ({page}
 test("outside-hours proposal needs approval and rejection keeps it out", async ({page}) => {
   await page.goto("/"); await loaded(page);
   const proposal=page.getByRole("region",{name:"Rush proposal",exact:true});
-  await expect(proposal).toContainText("14:30–14:45 proposal");
+  await expect(proposal).toContainText("2:30–2:45 PM proposal");
   await expect(proposal.locator(".row")).toHaveCount(0);
   await page.screenshot({path:"../output/kstation-rush-proposal.png",fullPage:false});
   await page.getByRole("button",{name:"Rest of today",exact:true}).click(); await loaded(page);
   const afternoon=page.getByRole("region",{name:"Afternoon rush",exact:true});
   await expect(afternoon).toHaveCount(0);
   await page.getByRole("button",{name:"Approve for today",exact:true}).click();
-  await expect(afternoon).toContainText("14:30–14:45");
+  await expect(afternoon).toContainText("2:30–2:45 PM");
   await expect(afternoon).toContainText("Approved for today");
   await expect(afternoon.locator(".row:visible")).toHaveCount(5);
   await afternoon.screenshot({path:"../output/kstation-rush-approved.png"});
