@@ -30,10 +30,11 @@ Table `order_lines`, one row per item line:
 
 | Table | Fields | Used for |
 |---|---|---|
-| `recipes` | item, ingredient, amount per serving, unit | dishes to ingredients |
+| `recipes` | item, ingredient, amount per serving, unit, `required` (can the dish go out without it? default yes) | dishes to ingredients; which dishes a shortage blocks |
 | `ingredients` | name, unit, batch size, cook/prep time (min), hold time (min), supplier, pack size, lead time (days) | timeline, prep order, ordering |
 | `on_hand` | ingredient, quantity, counted_at | need minus have |
 | `context_calendar` | date, label (holiday / Steelers home game / weather) | agent adjustments |
+| `crew` | name, role (`shift_manager` / `crew`), shifts, tablet or phone to notify | who gets the pre-rush stock check |
 
 All demo data is **synthetic** and labeled as such.
 
@@ -143,7 +144,100 @@ Shown as 2–4 short bullets at the top of the prep sheet, ranked by impact. Typ
 
 ---
 
-## 6. Feature 4: Rush-hour heatmap
+## 6. Feature 4: Pre-rush stock check
+
+**User:** the shift manager on duty, or a crew member if the manager doesn't answer.
+
+**Purpose:** before each rush, ask the kitchen whether it has enough of the ingredients the rush's most-ordered dishes depend on. Then rank the shortfalls and name the **top 3 ingredients to prep first**.
+
+### When and who
+
+- **Send time** = `rush_start − lead`, where `lead` = the longest prep duration among the rush's required ingredients + 15 min (minimum 45 min). It is never sent before the previous rush ends; if that clips the lead, the long-prep ingredient is already covered by early prep.
+  Example: Craig St dinner starts 17:00, barbacoa takes 180 min, lunch ends 14:00 → the check goes out at **14:00**.
+- **Recipient:** the shift manager on shift in `crew`. If there's no answer in 10 min, the check goes to the next crew member on shift. If nobody answers in 20 min, the tablet shows the top 3 by orders at risk, marked **unchecked**.
+- **Delivery:** a notification on the prep tablet (and the phone in `crew`, if set). The check is one screen and takes under a minute.
+
+### What the crew answers
+
+Only the ingredients that matter for this rush: the **8 required ingredients with the highest orders at risk** (below). The 4 optional ones are left off. For each, the crew taps:
+
+| Answer | Shortfall used |
+|---|---|
+| **Enough** | 0 |
+| **Low** | 0.5 |
+| **Out** | 1.0 |
+| Enter a count (optional) | `max(0, need − count) / need` |
+
+Counts are saved through `POST /on-hand` and also feed Feature 1. Answers never change the prep list's counts or its list order (see GLOSSARY: nobody edits or checks off a count).
+
+### Ranking math
+
+For rush `R` with forecast dish portions `f[i]` (baseline × agent multiplier, same as Feature 1) and ingredient `g`:
+
+```
+need[g]          = Σ_i f[i] × amount_per_serving[i, g]
+orders_at_risk[g] = Σ f[i] over dishes i where g is required
+risk_share[g]     = orders_at_risk[g] / Σ_i f[i]                  0–1: how much of the rush this ingredient blocks
+shortfall[g]      = from the crew's answer                        0–1
+time_pressure[g]  = min(1, prep_minutes[g] / minutes_until_rush)  1 = one batch can't finish before the rush
+score[g]          = risk_share × shortfall × (1 + time_pressure)  0–2
+```
+
+- **Top 3** = the three highest scores with `shortfall > 0`. Ties go to the longer prep duration.
+- If fewer than 3 ingredients are short, the remaining slots show the highest `risk_share` items marked **covered**, so the crew knows what to keep an eye on.
+- If `time_pressure = 1` and the ingredient is short, the action changes from "prep now" to "**can't finish before the rush**." The agent suggests pushing other dishes or 86ing the item at an estimated time. The estimate is the slot where cumulative forecast demand passes on-hand, from the Feature 2 curve.
+- Weighting by orders blocked, not by quantity, keeps garnishes and sauces from outranking the protein that ten bowls depend on. Dishes with no ingredients, such as drinks, are left out of the total.
+
+### Worked example (synthetic data)
+
+Craig St, Friday dinner 17:00–21:00, based on the last 8 Fridays: ~84 orders, ~174 dish portions, with wings, chicken bowls, and barbacoa bowls on top. The check is answered at 14:00, so `minutes_until_rush` = 180.
+
+| Ingredient | Need | On hand | Risk share | Shortfall | Time pressure | Score | Rank |
+|---|---|---|---|---|---|---|---|
+| Braised barbacoa | 152 oz | 60 oz | 0.24 | 0.60 | 1.00 | 0.29 | **1** |
+| Cilantro-lime rice | 327 oz | 180 oz | 0.34 | 0.45 | 0.22 | 0.19 | **2** |
+| Fries (blanched) | 334 oz | 200 oz | 0.32 | 0.40 | 0.19 | 0.15 | **3** |
+| Tortillas | 54 | 30 | 0.16 | 0.45 | 0.03 | 0.08 | 4 |
+| Wings | 211 | 120 | 0.12 | 0.43 | 0.22 | 0.06 | 5 |
+| Chicken, beans, patties, buns | — | enough | — | 0 | — | 0 | — |
+
+Wings are the single most-ordered dish but rank 5th, because only one dish needs them. Barbacoa ranks 1st because its 3-hour braise has to start right now.
+
+### Output shape
+
+```json
+{
+  "rush": "dinner",
+  "date": "2026-11-13",
+  "checked_by": "shift_manager",
+  "checked_at": "14:03",
+  "status": "answered",
+  "priorities": [
+    {
+      "rank": 1,
+      "ingredient": "braised beef barbacoa",
+      "need": "152 oz",
+      "on_hand": "60 oz",
+      "to_prep": "1 batch (96 oz)",
+      "score": 0.29,
+      "action": "Start barbacoa now — 3 hr braise finishes right at 17:00",
+      "reason": "Barbacoa bowls and tacos are ~24% of Friday dinner portions; 60 oz covers about the first hour"
+    }
+  ]
+}
+```
+
+The agent writes `action` and `reason`. Plain Python computes every number.
+
+### UI
+
+- A **"Prep these first"** card at the top of the next-rush prep list: three rows, each with an ingredient, the action, and a one-line reason.
+- The card sits above the prep list and doesn't reorder it.
+- Each row is labeled with who answered and when, or with **unchecked**.
+
+---
+
+## 7. Feature 5: Rush-hour heatmap
 
 **User:** manager and owner.
 
@@ -171,7 +265,7 @@ Shown as 2–4 short bullets at the top of the prep sheet, ranked by impact. Typ
 
 ---
 
-## 7. Feature 5: Weekly owner summary + order list
+## 8. Feature 6: Weekly owner summary + order list
 
 **User:** owner, once a week (e.g., Sunday night).
 
@@ -209,7 +303,7 @@ Group by supplier, and flag anything whose lead time means it must be ordered to
 
 ---
 
-## 8. Who does what
+## 9. Who does what
 
 | Piece | Plain Python | Agent (LLM) |
 |---|---|---|
@@ -220,13 +314,15 @@ Group by supplier, and flag anything whose lead time means it must be ordered to
 | Dishes to ingredients, need − have | ✅ | |
 | Rush timeline scheduling | ✅ | ✅ writes the reasons |
 | Stock-out detection | ✅ | ✅ explains |
+| Pre-rush stock check: send time, scores, top 3 | ✅ | |
+| Stock check: actions and reasons, can't-make-in-time advice | | ✅ |
 | Heatmap | ✅ | |
 | Weekly summary narrative | | ✅ |
 | Order list quantities | ✅ | ✅ adjusts safety stock for events |
 
 ---
 
-## 9. Backend endpoints
+## 10. Backend endpoints
 
 | Endpoint | Returns |
 |---|---|
@@ -235,11 +331,13 @@ Group by supplier, and flag anything whose lead time means it must be ordered to
 | `GET /heatmap?metric=orders&channel=all` | Feature 4 grid |
 | `GET /weekly-summary?week_start=YYYY-MM-DD` | Feature 5 sections + order list |
 | `POST /on-hand` | Save manager's counts |
+| `GET /rush-check?date=YYYY-MM-DD&rush=dinner` | Feature 4: the ingredients to ask about, send time, recipient |
+| `POST /rush-check` | Save the crew's Enough / Low / Out answers (or counts); returns the ranked top 3 |
 | `POST /menu-map/approve` | Confirm item matches |
 
 ---
 
-## 10. Data handling rules (from the handoff doc)
+## 11. Data handling rules (from the handoff doc)
 
 - Keep IDs as strings.
 - Count distinct `order_id` for order volume; sum `quantity` for dish volume. Never sum `subtotal` across item rows.
@@ -250,15 +348,16 @@ Group by supplier, and flag anything whose lead time means it must be ordered to
 
 ---
 
-## 11. Demo script (~3 min)
+## 12. Demo script (~3 min)
 
 1. Show the two raw CSVs with different column names; then the unified data.
 2. Heatmap: point out Friday/Saturday dinner peaks and the delivery-heavy late slots.
 3. Prep sheet for a normal Tuesday, sorted by hold time.
 4. Switch to a Steelers Sunday: amounts jump, flags explain why, timeline moves batch starts earlier.
-5. Weekly owner summary: trends, stock-out recap, and next week's order list grouped by supplier.
+5. Pre-rush stock check at 14:00 on a Friday: the manager taps Low on barbacoa and rice, and the top 3 appears with "start barbacoa now."
+6. Weekly owner summary: trends, stock-out recap, and next week's order list grouped by supplier.
 
-## 12. Out of scope (future work)
+## 13. Out of scope (future work)
 
 - Live in-service updates from order webhooks
 - Camera-based food level monitoring

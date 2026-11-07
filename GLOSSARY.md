@@ -63,3 +63,11 @@ _Avoid_: Service window
 **Prep list**:
 The list of prep counts for one window. Every staff member sees the same counts. Nobody edits a count or checks one off.
 _Avoid_: Ticket, schedule, fire board
+
+**Stock check**:
+A question sent to the shift manager before a rush: is there enough of each ingredient that rush's top dishes need? The answer is Enough, Low, Out, or a count. It records what is on hand. It does not edit or check off a prep count.
+_Avoid_: Inventory audit, prep checkoff
+
+**Prep first**:
+The three ingredients a stock check ranks highest. The ranking weighs how many of the rush's orders each ingredient blocks, how short the kitchen is, and whether one batch can finish before the rush. It sits above the prep list and does not change the list order.
+_Avoid_: Priority switch, reordering the prep list
