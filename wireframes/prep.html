@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prep wireframes</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 28px 20px 64px;
+      background: #d5d8de;
+      color: #1c1c1e;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .tools {
+      max-width: 980px;
+      margin: 0 auto 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .tools label {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      font-size: 14px;
+    }
+    .tools select {
+      min-height: 36px;
+      border: 1px solid #c7c7cc;
+      border-radius: 8px;
+      background: #fff;
+      font: inherit;
+      font-size: 14px;
+    }
+    .tools p {
+      margin: 0;
+      max-width: 62ch;
+      color: #3a3a3c;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    #prep-wire { max-width: 980px; margin: 0 auto; }
+    #prep-wire .sr {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    #prep-wire .bezel {
+      padding: 14px;
+      border-radius: 36px;
+      background: #1c1c1e;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+    }
+    #prep-wire .tablet {
+      display: flex;
+      flex-direction: column;
+      min-height: 640px;
+      max-height: 760px;
+      overflow: auto;
+      border-radius: 24px;
+      background: #f2f2f7;
+      color: #1c1c1e;
+    }
+    #prep-wire .status {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 22px 0;
+      color: #1c1c1e;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    #prep-wire .bar,
+    #prep-wire .nav,
+    #prep-wire .sub,
+    #prep-wire .row,
+    #prep-wire .moves {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    #prep-wire .sub[hidden] { display: none; }
+    #prep-wire .bar {
+      justify-content: space-between;
+      padding: 8px 22px 12px;
+    }
+    #prep-wire .bar strong {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+    #prep-wire #clock {
+      color: #636366;
+      font-size: 15px;
+      font-weight: 500;
+    }
+    #prep-wire .nav,
+    #prep-wire .sub {
+      gap: 4px;
+      margin: 0 22px;
+      padding: 4px;
+      border-radius: 12px;
+      background: #e5e5ea;
+    }
+    #prep-wire .sub { margin-top: 8px; align-self: flex-start; }
+    #prep-wire button {
+      min-height: 36px;
+      padding: 8px 12px;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: #1c1c1e;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    #prep-wire button[aria-selected="true"],
+    #prep-wire button[aria-pressed="true"] {
+      background: #fff;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+    }
+    #prep-wire button:focus-visible {
+      outline: 3px solid #007aff;
+      outline-offset: 2px;
+    }
+    #prep-wire h2, #prep-wire h3, #prep-wire p { margin: 0; }
+    #prep-wire h2 { font-size: 17px; font-weight: 650; }
+    #prep-wire p, #prep-wire li { font-size: 15px; line-height: 1.35; }
+    #prep-panel { padding: 16px 22px 28px; }
+    #prep-wire .stack { display: flex; flex-direction: column; gap: 12px; }
+    #prep-wire .rush,
+    #prep-wire .note,
+    #prep-wire .proposal,
+    #prep-wire .setup-block {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: #fff;
+    }
+    #prep-wire .note { background: #fff4e5; }
+    #prep-wire .proposal { background: #e8f1ff; }
+    #prep-wire .meta { color: #636366; font-size: 13px; }
+    #prep-wire .row {
+      justify-content: space-between;
+      min-height: 52px;
+      padding: 8px 0;
+      border-bottom: 1px solid #e5e5ea;
+    }
+    #prep-wire .row:last-of-type { border-bottom: 0; }
+    #prep-wire .dish { font-size: 17px; font-weight: 600; }
+    #prep-wire .count {
+      min-width: 36px;
+      color: #1c1c1e;
+      font-size: 22px;
+      font-weight: 700;
+      text-align: right;
+    }
+    #prep-wire .moves button,
+    #prep-wire .proposal .moves button,
+    #prep-wire .rush > button {
+      min-height: 32px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: #f2f2f7;
+      color: #007aff;
+      font-size: 13px;
+    }
+    #prep-wire .proposal .moves button {
+      background: #007aff;
+      color: #fff;
+    }
+    #prep-wire .proposal .moves button[data-act="reject"] {
+      background: #f2f2f7;
+      color: #1c1c1e;
+    }
+    #prep-wire ul { margin: 0; padding-left: 18px; }
+    #prep-wire li { padding: 6px 0; }
+  </style>
+</head>
+<body>
+  <div class="tools">
+    <label>Variation
+      <select id="variation"></select>
+    </label>
+    <p>Copy an entry in the variations list at the top of this file, rename it, and refresh. Share the file, or push it so teammates open the same page.</p>
+  </div>
+  <div id="prep-wire">
+    <p class="sr">Working prep tablet. Switch variations from the menu above.</p>
+    <div class="bezel">
+    <div class="tablet">
+      <div class="status"><span id="status-time">11:00</span><span>Wi-Fi 100%</span></div>
+      <header class="bar">
+        <strong>Prep</strong>
+        <span id="clock">Wed 11:00</span>
+      </header>
+      <div class="nav" role="tablist" aria-label="Windows">
+        <button type="button" data-view="next" role="tab" aria-selected="true">Next rush</button>
+        <button type="button" data-view="today" role="tab" aria-selected="false">Rest of today</button>
+        <button type="button" data-view="tomorrow" role="tab" aria-selected="false">Tomorrow</button>
+        <button type="button" data-view="ahead" role="tab" aria-selected="false">Further ahead</button>
+        <button type="button" data-view="setup" role="tab" aria-selected="false">Setup</button>
+      </div>
+      <div class="sub" id="ahead-nav" hidden>
+        <button type="button" data-span="week" aria-pressed="true">Week</button>
+        <button type="button" data-span="month" aria-pressed="false">Month</button>
+        <button type="button" data-span="next" aria-pressed="false">Next month</button>
+      </div>
+      <div id="prep-panel"></div>
+    </div>
+    </div>
+  </div>
+  <script>
+    // Add a variation by copying one of these objects and changing its name.
+    var variations = [
+      {
+        name: "Wednesday lunch",
+        clock: "Wed 11:00",
+        early: "Dinner: start brisket now. It takes 4 hours, and dinner starts at 5:00.",
+        proposal: {
+          hours: "3:00–4:00",
+          text: "Repeating. After school. Busy on 3 of the last 4 Wednesdays.",
+          approved: "After school approved. It is a rush from now on. Portions for today are on Rest of today.",
+          rejected: "Rejected. Nothing to prep for 3:00–4:00.",
+          rushTitle: "After school",
+          rushReason: "Approved for today. Busy on 3 of the last 4 Wednesdays.",
+          listId: "school"
+        },
+        dishes: { burgers: "Burgers", pad: "Pad thai", fries: "Fries", brisket: "Brisket" },
+        lists: {
+          lunch: { title: "Lunch", hours: "11:00–2:00", reason: "Standing rush. Next rush.", order: ["burgers", "pad", "fries"], counts: { burgers: 14, pad: 9, fries: 6 } },
+          dinner: { title: "Dinner", hours: "5:00–7:30", reason: "Standing rush.", order: ["burgers", "fries", "brisket"], counts: { burgers: 18, fries: 11, brisket: 6 } },
+          school: { title: "After school", hours: "3:00–4:00", reason: "Approved for today. Busy on 3 of the last 4 Wednesdays.", order: ["burgers", "fries"], counts: { burgers: 10, fries: 8 } },
+          thuLunch: { title: "Lunch", hours: "11:00–2:00", reason: "Standing rush.", order: ["burgers", "pad", "fries"], counts: { burgers: 11, pad: 8, fries: 5 } },
+          thuDinner: { title: "Dinner", hours: "5:00–7:30", reason: "Standing rush.", order: ["burgers", "fries", "brisket"], counts: { burgers: 16, fries: 9, brisket: 6 } }
+        },
+        today: ["lunch", "dinner"],
+        tomorrow: ["thuLunch", "thuDinner"],
+        sums: {
+          week: { label: "This week", order: ["burgers", "fries", "pad", "brisket"], counts: { burgers: 86, fries: 40, pad: 28, brisket: 18 } },
+          month: { label: "This month", order: ["burgers", "fries", "pad", "brisket"], counts: { burgers: 340, fries: 160, pad: 110, brisket: 70 } },
+          next: { label: "Next month", order: ["burgers", "fries", "pad", "brisket"], counts: { burgers: 360, fries: 170, pad: 120, brisket: 74 } }
+        },
+        setup: {
+          hours: ["Lunch 11:00–2:00", "Dinner 5:00–7:30"],
+          durations: ["Brisket, 4 hours", "Pad thai, 15 minutes", "Burgers, 10 minutes", "Fries, 8 minutes"]
+        }
+      },
+      {
+        name: "Quiet Tuesday",
+        clock: "Tue 4:30",
+        early: "",
+        proposal: null,
+        dishes: { burgers: "Burgers", salad: "Salad", fries: "Fries" },
+        lists: {
+          lunch: { title: "Dinner", hours: "5:00–7:30", reason: "Standing rush. Next rush.", order: ["salad", "burgers", "fries"], counts: { salad: 7, burgers: 4, fries: 3 } },
+          dinner: { title: "Dinner", hours: "5:00–7:30", reason: "Standing rush.", order: ["salad", "burgers", "fries"], counts: { salad: 7, burgers: 4, fries: 3 } },
+          wedLunch: { title: "Lunch", hours: "11:00–2:00", reason: "Standing rush.", order: ["burgers", "salad", "fries"], counts: { burgers: 6, salad: 5, fries: 2 } },
+          wedDinner: { title: "Dinner", hours: "5:00–7:30", reason: "Standing rush.", order: ["salad", "burgers", "fries"], counts: { salad: 8, burgers: 5, fries: 3 } }
+        },
+        today: ["dinner"],
+        tomorrow: ["wedLunch", "wedDinner"],
+        sums: {
+          week: { label: "This week", order: ["salad", "burgers", "fries"], counts: { salad: 40, burgers: 28, fries: 16 } },
+          month: { label: "This month", order: ["salad", "burgers", "fries"], counts: { salad: 150, burgers: 110, fries: 60 } },
+          next: { label: "Next month", order: ["salad", "burgers", "fries"], counts: { salad: 160, burgers: 120, fries: 64 } }
+        },
+        setup: {
+          hours: ["Lunch 11:00–2:00", "Dinner 5:00–7:30"],
+          durations: ["Salad, 20 minutes", "Burgers, 10 minutes", "Fries, 8 minutes"]
+        }
+      }
+    ];
+
+    var root = document.getElementById("prep-wire");
+    var panel = document.getElementById("prep-panel");
+    var aheadNav = document.getElementById("ahead-nav");
+    var picker = document.getElementById("variation");
+    var clock = document.getElementById("clock");
+    var statusTime = document.getElementById("status-time");
+    var current = 0;
+    var view = "next";
+    var span = "week";
+    var proposal = "pending";
+    var order = {};
+
+    function esc(value) {
+      return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function data() { return variations[current]; }
+
+    function loadOrder() {
+      order = {};
+      Object.keys(data().lists).forEach(function (key) {
+        order[key] = data().lists[key].order.slice();
+      });
+      Object.keys(data().sums).forEach(function (key) {
+        order[key] = data().sums[key].order.slice();
+      });
+    }
+
+    function rows(listId, counts) {
+      return order[listId].map(function (id) {
+        var count = counts[id];
+        if (!count) return "";
+        var name = data().dishes[id] || id;
+        return '<div class="row"><span class="dish">' + esc(name) + '</span><span class="moves"><span class="count">' + count + '</span><button type="button" data-act="up" data-list="' + listId + '" data-id="' + id + '" aria-label="Move ' + esc(name) + ' up">Up</button><button type="button" data-act="down" data-list="' + listId + '" data-id="' + id + '" aria-label="Move ' + esc(name) + ' down">Down</button></span></div>';
+      }).join("");
+    }
+
+    function rushBlock(listId, reason) {
+      var list = data().lists[listId];
+      var shown = reason || list.reason;
+      return '<section class="rush" aria-label="' + esc(list.title) + '"><h2>' + esc(list.title) + ' · ' + esc(list.hours) + '</h2><p class="meta">' + esc(shown) + '</p>' + rows(listId, list.counts) + '</section>';
+    }
+
+    function proposalBlock() {
+      var item = data().proposal;
+      if (!item) return "";
+      if (proposal === "pending") {
+        return '<section class="proposal" aria-label="Rush proposal"><h2>' + esc(item.hours) + ' proposal</h2><p>' + esc(item.text) + '</p><p>No portions until the lead approves.</p><div class="moves"><button type="button" data-act="approve">Approve rush</button><button type="button" data-act="reject">Reject rush</button></div></section>';
+      }
+      if (proposal === "approved") return '<section class="note"><p>' + esc(item.approved) + "</p></section>";
+      return '<section class="note"><p>' + esc(item.rejected) + "</p></section>";
+    }
+
+    function sumBlock() {
+      var block = data().sums[span];
+      return '<section class="rush" aria-label="' + esc(block.label) + '"><h2>' + esc(block.label) + '</h2><p class="meta">Sum of the rushes in this span. Not a pile to cook now.</p>' + rows(span, block.counts) + '</section>';
+    }
+
+    function setupBlock() {
+      var setup = data().setup;
+      return '<div class="stack"><section class="setup-block" aria-label="Standing hours"><h2>Standing hours</h2><ul>' + setup.hours.map(function (line) { return "<li>" + esc(line) + "</li>"; }).join("") + '</ul></section><section class="setup-block" aria-label="Prep durations"><h2>Prep durations</h2><ul>' + setup.durations.map(function (line) { return "<li>" + esc(line) + "</li>"; }).join("") + "</ul></section></div>";
+    }
+
+    function paint() {
+      var item = data();
+      clock.textContent = item.clock;
+      statusTime.textContent = item.clock.split(" ").pop();
+      root.querySelectorAll("[data-view]").forEach(function (button) {
+        button.setAttribute("aria-selected", button.getAttribute("data-view") === view ? "true" : "false");
+      });
+      root.querySelectorAll("[data-span]").forEach(function (button) {
+        button.setAttribute("aria-pressed", button.getAttribute("data-span") === span ? "true" : "false");
+      });
+      aheadNav.hidden = view !== "ahead";
+      var html = "";
+      if (view === "next") {
+        html = '<div class="stack">';
+        if (item.early) html += '<section class="note" aria-label="Early prep"><h2>Early prep</h2><p>' + esc(item.early) + "</p></section>";
+        html += proposalBlock() + rushBlock(item.today[0], item.lists[item.today[0]].reason.indexOf("Next rush") === -1 ? "Standing rush. Next rush." : null) + "</div>";
+      } else if (view === "today") {
+        html = '<div class="stack">' + proposalBlock();
+        item.today.forEach(function (id) { html += rushBlock(id); });
+        if (item.proposal && proposal === "approved" && item.proposal.listId) html += rushBlock(item.proposal.listId);
+        html += "</div>";
+      } else if (view === "tomorrow") {
+        html = '<div class="stack">' + item.tomorrow.map(function (id) { return rushBlock(id); }).join("") + "</div>";
+      } else if (view === "ahead") {
+        html = sumBlock();
+      } else {
+        html = setupBlock();
+      }
+      panel.innerHTML = html;
+    }
+
+    function move(listId, id, direction) {
+      var list = order[listId];
+      if (!list) return;
+      var index = list.indexOf(id);
+      var next = index + direction;
+      if (index < 0 || next < 0 || next >= list.length) return;
+      var swap = list[index];
+      list[index] = list[next];
+      list[next] = swap;
+    }
+
+    variations.forEach(function (item, index) {
+      var option = document.createElement("option");
+      option.value = String(index);
+      option.textContent = item.name;
+      picker.appendChild(option);
+    });
+
+    picker.addEventListener("change", function () {
+      current = Number(picker.value);
+      view = "next";
+      span = "week";
+      proposal = "pending";
+      loadOrder();
+      paint();
+    });
+
+    root.addEventListener("click", function (event) {
+      var target = event.target.closest("button");
+      if (!target || !root.contains(target)) return;
+      if (target.hasAttribute("data-view")) {
+        view = target.getAttribute("data-view");
+        paint();
+        return;
+      }
+      if (target.hasAttribute("data-span")) {
+        span = target.getAttribute("data-span");
+        paint();
+        return;
+      }
+      var act = target.getAttribute("data-act");
+      if (act === "approve") proposal = "approved";
+      if (act === "reject") proposal = "rejected";
+      if (act === "up") move(target.getAttribute("data-list"), target.getAttribute("data-id"), -1);
+      if (act === "down") move(target.getAttribute("data-list"), target.getAttribute("data-id"), 1);
+      paint();
+    });
+
+    loadOrder();
+    paint();
+  </script>
+</body>
+</html>
