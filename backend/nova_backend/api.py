@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
-from nova_backend import analytics, queries
+from nova_backend import analytics, queries, rush_agent
 from nova_backend.config import get_settings
 from nova_backend.db import get_session
 from nova_backend.pagination import InvalidCursor
@@ -24,6 +24,8 @@ from nova_backend.schemas import (
     OrderLineOut,
     OrderOut,
     Page,
+    RushHoursOut,
+    RushParams,
     SaleParams,
     StoreOut,
     StoreParams,
@@ -142,3 +144,12 @@ def tablet_outlook(
         return analyze(session, date, source)
     except ValueError as exc:
         return JSONResponse(status_code=503, content={"detail": str(exc)})
+
+@app.get("/rush-hours", response_model=RushHoursOut)
+def rush_hours(params: Annotated[RushParams, Query()], session: SessionDependency):
+    """Rush hours (order-traffic spikes) underway or still to come on a day, from `time` on.
+
+    An OpenRouter agent investigates the history with tools and adjusts the forecast; Python
+    recomputes every number. Without OPENROUTER_KEY it returns the historical forecast.
+    """
+    return rush_agent.predict_rush_hours(session, params)

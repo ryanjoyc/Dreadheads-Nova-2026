@@ -123,3 +123,38 @@ def test_top_dishes_scopes_and_limits(client):
     assert empty["data"] == []
     for limit in (0, 101):
         assert client.get("/dishes/top", params={"limit": limit}).status_code == 400
+
+
+def test_top_dishes_accepts_exact_start_and_end_times(client):
+    # 11:00:00-11:15:00 on 2026-05-01 holds five orders. Four dishes sell 2 units each;
+    # Crispy Tofu Bowl wins the tie with 2 orders, then names break the 1-order ties.
+    response = client.get(
+        "/dishes/top", params={"start": "2026-05-01T11:00", "end": "2026-05-01T11:15", "limit": 2}
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["start"] == "2026-05-01T11:00:00" and body["end"] == "2026-05-01T11:15:00"
+    assert body["date_start"] == "2026-05-01" and body["date_end"] == "2026-05-02"
+    assert [(d["item_name"], d["units"]) for d in body["data"]] == [
+        ("Crispy Tofu Bowl", 2),
+        ("Chips & Guac", 2),
+    ]
+    late = client.get("/dishes/top", params={"start": "2026-05-01T11:40"}).json()
+    assert [(d["item_name"], d["units"]) for d in late["data"]] == [
+        ("Double Smash Burger", 1),
+        ("Smash Burger", 1),
+    ]
+    assert client.get("/dishes/top", params={"end": "2026-05-01T10:00"}).json()["data"] == []
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        {"start": "2026-05-01T12:00", "end": "2026-05-01T11:00"},
+        {"start": "2026-05-01T11:00", "date": "2026-05-01"},
+        {"end": "2026-05-01T11:00", "date_start": "2026-04-01"},
+        {"start": "not-a-time"},
+    ],
+)
+def test_top_dishes_rejects_bad_start_end(client, params):
+    assert client.get("/dishes/top", params=params).status_code == 400
