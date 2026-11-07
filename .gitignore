@@ -16,3 +16,8 @@ node_modules/
 dist/
 .vscode/
 .DS_Store
+
+# Local demo verification artifacts
+/output/
+frontend/test-results/
+frontend/playwright-report/

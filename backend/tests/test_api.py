@@ -123,4 +123,6 @@ def test_documentation_and_openapi(client):
         "/items",
         "/imports",
         "/dishes/top",
+        "/tablet",
+        "/tablet/outlook",
     }

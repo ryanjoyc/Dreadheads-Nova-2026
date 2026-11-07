@@ -1,0 +1,16 @@
+services:
+  tablet-api:
+    build: .
+    image: nova-tablet-demo:local
+    environment:
+      DATABASE_URL: postgresql+psycopg://nova:nova_local@db:5432/nova_sales
+      RAW_STORAGE_PATH: /raw-imports
+      CORS_ORIGINS: '["http://localhost:5173","http://127.0.0.1:5173"]'
+    ports:
+      - '127.0.0.1:8003:8000'
+    volumes:
+      - raw-imports:/raw-imports
+      - ../:/workspace:ro
+    depends_on:
+      db:
+        condition: service_healthy

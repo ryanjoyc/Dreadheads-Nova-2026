@@ -1,7 +1,8 @@
 """Read-only HTTP access to previously imported sales reports."""
 
 import logging
-from typing import Annotated
+from datetime import date as Date
+from typing import Annotated, Literal
 
 from fastapi import Depends, FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
@@ -111,3 +112,33 @@ def items(params: Annotated[ItemParams, Query()], session: SessionDependency):
 @app.get("/imports", response_model=Page[ImportOut])
 def imports(params: Annotated[ImportParams, Query()], session: SessionDependency):
     return queries.list_imports(session, params)
+
+
+@app.get("/tablet")
+def tablet(
+    session: SessionDependency,
+    date: Date = Query(..., description="Store-local forecast date, YYYY-MM-DD"),
+    source: Literal["doordash", "grubhub"] | None = None,
+):
+    """Sales-only synthetic K-Station forecast and observed history for the tablet."""
+    from nova_backend.tablet import tablet_analysis
+
+    try:
+        return tablet_analysis(session, date, source)
+    except ValueError as exc:
+        return JSONResponse(status_code=503, content={"detail": str(exc)})
+
+
+@app.get("/tablet/outlook")
+def tablet_outlook(
+    session: SessionDependency,
+    date: Date = Query(..., description="Start of the seven-day sales outlook"),
+    source: Literal["doordash", "grubhub"] | None = None,
+):
+    """Seven-day dish sales outlook using only history before the start date."""
+    from nova_backend.tablet import tablet_outlook as analyze
+
+    try:
+        return analyze(session, date, source)
+    except ValueError as exc:
+        return JSONResponse(status_code=503, content={"detail": str(exc)})

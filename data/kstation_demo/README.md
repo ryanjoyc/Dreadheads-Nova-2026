@@ -97,6 +97,6 @@ The analyzer uses source CSVs and API-exported records, independently recalculat
 
 Only sales/report fields are present. No recipes, inventory, preparation durations, staffing, kitchen logs, weather, or event causes are supplied or inferred. The data cannot establish capacity, waiting times, lost demand, or stockouts. Login, OAuth, real provider downloads, and scheduled synchronization are not implemented by this scenario.
 
-October supplies four or five occurrences of each weekday, fewer than David's eight-week baseline. Historical forecasts must use only earlier dates, report the actual comparable-day count, and make insufficient-history confidence explicit. This dataset is not wired into David's agent or the frontend by this change.
+October supplies four or five occurrences of each weekday, fewer than David's eight-week baseline. Historical forecasts must use only earlier dates, report the actual comparable-day count, and make insufficient-history confidence explicit. The integration branch connects this dataset to the sales-only tablet through `/tablet` and `/tablet/outlook`; see [the demo guide](../../docs/local-demo.md). The legacy recipe agent is not used.
 
 All source reports, backend exports, and analysis outputs are labeled synthetic. Existing Harbor Deli files, prior database rows, and prior import audit records were preserved during initial imports and replay. Nothing in this folder constitutes K-Station's real sales evidence.

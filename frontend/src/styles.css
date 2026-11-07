@@ -217,3 +217,40 @@ ul {
 li {
   padding: 6px 0;
 }
+
+/* Demo controls stay outside Kurt's tablet flow. */
+:root { --ink: #1c1c1e; --muted-ink: #48484a; --surface: #fff; --line: #c7c7cc; --focus: #005fcc; --space: 1rem; }
+.demo-tools { max-width: 980px; margin: 0 auto 18px; }
+.demo-tools .banner { margin-bottom: .5rem; }
+.demo-tools summary { font-size: .875rem; }
+#controls, .demo-buttons { display:flex; flex-wrap:wrap; gap:.5rem; align-items:end; margin-top:.75rem; }
+#controls label { display:flex; flex-direction:column; gap:.375rem; font-size:.875rem; }
+input { min-height:2.25rem; padding:0 .5rem; border:1px solid var(--line); border-radius:.5rem; font:inherit; background:var(--surface); color:var(--ink); }
+.load-button { background:var(--ink); color:var(--surface); }
+.tablet { max-height:none; }
+.nav { flex-wrap:wrap; }
+.row { gap:var(--space); }
+.dish { overflow-wrap:anywhere; }
+.count { flex-shrink:0; font-variant-numeric:tabular-nums; }
+.meta, .uses { color:var(--muted-ink); }
+.more-dishes { margin-top:.5rem; }
+summary { min-height:1.5rem; cursor:pointer; }
+summary:focus-visible, input:focus-visible { outline:3px solid var(--focus); outline-offset:2px; }
+button:hover { background:var(--line); color:var(--ink); }
+button:disabled { opacity:.6; cursor:wait; }
+button:active { transform:translateY(1px); }
+.sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+@media(max-width:25rem) {
+  body { padding:.75rem .375rem; }
+  .bezel { padding:.375rem; border-radius:1.5rem; }
+  .bar { padding-inline:.75rem; }
+  .bar strong { font-size:1.5rem; }
+  .nav { margin-inline:.75rem; }
+  #panel { padding:.75rem; }
+  .rush, .note, .setup-block { padding:.75rem; }
+}
+@media(prefers-reduced-motion:reduce) { button:active { transform:none; } }
+.bar h1 { margin:0; font-size:28px; font-weight:700; letter-spacing:-.03em; }
+@media(max-width:25rem) { .bar h1 { font-size:1.5rem; } }
+.proposal .moves button { background:var(--focus); color:var(--surface); }
+.proposal .moves button[data-reject] { background:#f2f2f7; color:var(--ink); }

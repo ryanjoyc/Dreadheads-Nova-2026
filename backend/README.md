@@ -2,7 +2,7 @@
 
 Local Python 3.12 / FastAPI / PostgreSQL 17 backend for synthetic DoorDash and Grubhub reports. Docker Compose is the only required host runtime. No provider credentials are needed.
 
-This backend serves observed sales records, plus two summaries built from them (order search and top dishes). It does not calculate forecasts, ingredient needs, or inventory, and does not implement the recommendation endpoints or connect the prep wireframe.
+This backend serves observed sales records, plus two summaries built from them (order search and top dishes). The integration branch also adds sales-only K-Station forecasts at `/tablet` and `/tablet/outlook`, connected to the tablet app. It does not calculate ingredients or inventory.
 
 For a second large sales-only scenario, see [Harbor Deli synthetic reports and verified API exports](../data/sales_only_demo/README.md). It contains 45,000 orders with changing channel mix, dish trends, and location-specific demand patterns, using only the supported sales fields.
 
@@ -125,3 +125,11 @@ This is a local synthetic-data implementation. There is no authentication or sch
 ## Separate recommendation agent service
 
 The merged agent implementation runs separately through `main:app`; see [agent setup and endpoints](AGENT_README.md). The sales service runs through `nova_backend.api:app`. Both guides default to port 8000; choose different ports when running both. These services and the frontend have not yet been integrated.
+
+## K-Station tablet analysis
+
+`GET /tablet?date=2026-10-29` returns expected order traffic, rush windows, projected dish sales, and separately labeled observed sales. Optional `source=doordash` or `source=grubhub` selects one feed; omitting it combines only the two explicitly mapped K-Station stores.
+
+`GET /tablet/outlook?date=2026-10-29` returns a seven-day outlook with input history frozen before the start date. Neither endpoint calls an LLM. Both use the existing sales query layer and read the current PostgreSQL records. The manifest maps provider item IDs to synthetic dishes. Invalid query parameters return 400; missing K-Station data returns 503.
+
+The demo API runs separately on port 8003 using `compose.demo.yaml`. Follow [the local demo guide](../docs/local-demo.md).
