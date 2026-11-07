@@ -10,3 +10,9 @@ __pycache__/
 .code-review-graph/
 backend/raw-imports/
 backend/test-results/
+*.pyc
+venv/
+node_modules/
+dist/
+.vscode/
+.DS_Store

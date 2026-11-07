@@ -121,3 +121,7 @@ This clears only the disposable test database and imports both reports twice. Ex
 `docker compose restart api db` preserves development data. `docker compose down` stops this project's containers while retaining named volumes. Do not use `down -v` unless you explicitly intend to erase this backend's development database and archived files. Leave other Docker projects untouched.
 
 This is a local synthetic-data implementation. There is no authentication or scheduled sync. Do not expose it publicly or load real merchant data before authorization and actual-export validation are designed.
+
+## Separate recommendation agent service
+
+The merged agent implementation runs separately through `main:app`; see [agent setup and endpoints](AGENT_README.md). The sales service runs through `nova_backend.api:app`. Both guides default to port 8000; choose different ports when running both. These services and the frontend have not yet been integrated.
