@@ -1,0 +1,69 @@
+name: nova_sales
+x-app: &app
+  build: .
+  image: nova-sales-backend:local
+  environment: &app-env
+    DATABASE_URL: postgresql+psycopg://nova:nova_local@db:5432/nova_sales
+    RAW_STORAGE_PATH: /raw-imports
+    CORS_ORIGINS: '${CORS_ORIGINS:-["http://localhost:3000","http://localhost:5173"]}'
+  volumes:
+    - raw-imports:/raw-imports
+    - ../:/workspace:ro
+  depends_on:
+    db:
+      condition: service_healthy
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: nova
+      POSTGRES_PASSWORD: nova_local
+      POSTGRES_DB: nova_sales
+    ports:
+      - '127.0.0.1:${DB_PORT:-55433}:5432'
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nova -d nova_sales"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  api:
+    <<: *app
+    ports:
+      - '127.0.0.1:${API_PORT:-8000}:8000'
+  migrate:
+    <<: *app
+    profiles: [tools]
+    command: ["alembic", "upgrade", "head"]
+  db-test:
+    image: postgres:17
+    profiles: [test]
+    environment:
+      POSTGRES_USER: nova
+      POSTGRES_PASSWORD: nova_test
+      POSTGRES_DB: nova_sales_test
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nova -d nova_sales_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  test:
+    build: .
+    image: nova-sales-backend:local
+    profiles: [test]
+    environment:
+      DATABASE_URL: postgresql+psycopg://nova:nova_test@db-test:5432/nova_sales_test
+      TEST_DATABASE_URL: postgresql+psycopg://nova:nova_test@db-test:5432/nova_sales_test
+      RAW_STORAGE_PATH: /tmp/nova-test-imports
+    volumes:
+      - ../:/workspace:ro
+    depends_on:
+      db-test:
+        condition: service_healthy
+    command: ["pytest", "-q"]
+volumes:
+  database:
+  raw-imports:

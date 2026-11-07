@@ -2,13 +2,13 @@
 
 Prepared November 7, 2026. Audience: backend and analytics teammates.
 
-Status: proposed design, not an implemented backend. Credentials and real merchant reports have not been obtained or tested.
+Status: implemented locally under `backend/` for synthetic reports. Credentials and real merchant reports have not been obtained or tested. See the [backend setup and API guide](../backend/README.md).
 
 ## Purpose
 
-Store normalized sales records from DoorDash `ORDER_DETAIL` and Grubhub `menu-line-items` in PostgreSQL. Give teammates read-only JSON endpoints for retrieving those records. Import historical reports initially, then refresh on each provider's reporting schedule.
+Store normalized sales records from DoorDash `ORDER_DETAIL` and Grubhub `menu-line-items` in PostgreSQL. Give teammates read-only JSON endpoints for retrieving those records. This implementation imports local complete-order synthetic CSVs through a CLI. Provider downloads and scheduled refreshes remain future work.
 
-This version uses documented report fields plus internal IDs and import bookkeeping. It does not include inventory, recipes, forecasts, ingredient calculations, live orders, or David's recommendation calculations. It provides data those features may consume later; it does not replace the proposed [recommendations spec](recommendations-spec.md).
+This version uses documented report fields plus internal IDs and import bookkeeping. It does not include inventory, recipes, forecasts, ingredient calculations, live orders, or David's recommendation calculations. It provides data those features may consume later; it does not replace the proposed [recommendations spec](recommendations-spec.md). The runtime is Python 3.12, FastAPI, synchronous SQLAlchemy/Psycopg, PostgreSQL 17, and explicit Alembic migrations through Docker Compose.
 
 All example records are synthetic. Verify actual report formats before connecting real merchants. See the [API field handoff](restaurant-api-data-handoff.md) for field availability and access constraints.
 
@@ -33,7 +33,7 @@ source_stores
 orders.last_import_run_id --> import_runs.id
 ```
 
-Preserve original downloaded files separately and reference them from `import_runs`. Store report versions, selected columns, and requested date coverage so an import can be traced and reproduced. Requested coverage does not by itself prove that every date has complete data.
+Preserve original input files separately and reference them from `import_runs`. Store report versions and columns so an import can be traced and reproduced. For local CSV imports, `requested_columns` contains the actual file headers, and `date_start`/exclusive `date_end` describe observed placement dates. They do not establish requested provider coverage or prove that every intervening date is complete. `row_count` records parsed rows; status is `running`, `succeeded`, or `failed`.
 
 Store timezone information alongside the source-local timestamp. Derive an absolute timestamp only when the source's timezone and timestamp semantics are confirmed; do not silently guess during daylight-saving transitions. Preserve historical item names and prices on order lines.
 
@@ -85,7 +85,7 @@ Collection responses use `data` and `next_cursor`. Accept an opaque `cursor` and
 
 `/orders` and `/order-lines` accept optional `source`, `store_id`, `date_start`, and `date_end`. `store_id` is our internal source-store ID. Date filters use the store-local placement date, with an inclusive start and exclusive end. `/items` and `/stores` accept a source filter; `/items` also accepts a store filter. `/imports` accepts source and status filters. Import request coverage follows the provider's date-boundary rules and must be translated separately from our API filters.
 
-The `/order-lines` response is the shared analytics dataset. It can return both sources, while retaining separate platform store and item identities. Monetary values are decimal strings or null, not binary floating-point values. Each record carries `is_synthetic` from its import provenance. Orders and lines also expose their last import reference so consumers can inspect freshness via `/imports`; import time is not the same as the provider's data cutoff.
+The `/order-lines` response is the shared analytics dataset. It can return both sources, while retaining separate platform store and item identities. Monetary values are decimal strings or null, not binary floating-point values. Whole-unit quantities are JSON integers; fractional quantities are decimal strings. Each order/line carries `is_synthetic` from its import provenance. Orders and lines also expose their last import reference so consumers can inspect freshness via `/imports`; import time is not the same as the provider's data cutoff. `/imports` excludes internal file references and exposes only sanitized errors. Cursors are scoped to the endpoint and filters and assume unchanged data between pages.
 
 ### Synthetic response example
 
@@ -120,11 +120,12 @@ This is an example of our normalized response, not a native provider response or
 
 ## Import behavior
 
-- Request reports, wait for completion, download the source files, validate them, then persist normalized records. Reporting APIs return job metadata before the CSV records are available.
+- Current entry point: `python -m nova_backend.imports --source doordash --file /path/to/report.csv --synthetic --complete-orders`, with an equivalent Grubhub source option. Both assertions are required. Local report version/provider ID metadata can be supplied; no provider request is made.
 - Scope order identity to its source store. Enforce uniqueness on `(source, external_store_id)` for stores and `(source_store_id, external_order_id)` for orders.
 - Refresh recent history to capture provider corrections. Reimporting overlapping reports must not duplicate orders or item quantities.
 - Preserve multiple lines for the same dish, including different modifiers. Do not deduplicate by item ID alone.
-- DoorDash supplies an item-line identifier. Grubhub's reviewed dictionary does not. Before importing Grubhub into persistent tables, verify that the requested report includes complete line sets for included orders. If verified, transactionally replace each included order's line set. If not verified, stop and resolve the reconciliation contract rather than applying an unsafe deduplication rule.
+- DoorDash supplies an item-line identifier. Grubhub's reviewed dictionary does not. This version accepts only synthetic files explicitly asserted to contain complete orders and transactionally replaces each included order's line set. Internal order IDs remain stable; line IDs can change after refresh. Before supporting real reports, verify the complete-order contract rather than assuming it from synthetic fixtures.
+- Validate the full file before modifying sales records. Failed writes roll back all sales changes and retain a separately recorded failed import. A PostgreSQL advisory lock serializes same-source writes. Ambiguous local times are retained with a warning; nonexistent local times are rejected. No UTC offset is guessed.
 - Do not delete orders merely because they are absent from a later report. Absence does not establish cancellation or deletion.
 - Keep order subtotal on `orders`; never sum it across repeated item rows. Do not derive a Grubhub subtotal by assuming quantity times item price includes modifiers, discounts, or other charges.
 - Preserve synthetic labels through storage and API responses. Never silently mix synthetic records with real merchant data under the same source-store identity.
@@ -132,7 +133,13 @@ This is an example of our normalized response, not a native provider response or
 
 Real provider credentials remain server-side. Frontend clients use our API rather than database credentials. Authentication and restaurant authorization must be defined before exposing real merchant data; this document does not specify a public deployment.
 
-## Acceptance checks for a future implementation
+## Verification
+
+The implementation is checked against real PostgreSQL using pytest, Alembic schema comparison/round trips, and Ruff. A running-service smoke test exercises all five endpoints, `/docs`, and `/openapi.json`. A restart check confirms persisted records and IDs survive API/database restart.
+
+The small fixtures contain four platform stores, twelve orders, and twenty-one item lines. The full platform reports reconcile independently to 45,056 orders, 85,833 item lines, and 100,096 item units after both initial imports and replay. Only platform files are imported. Commands and test isolation rules are in the [backend guide](../backend/README.md).
+
+Acceptance checks:
 
 1. Import labeled fixtures from both providers and verify the mapped IDs, names, quantities, placement times, and source provenance.
 2. Reimport the same and overlapping fixtures; order counts and item quantities remain unchanged unless source values changed.
@@ -145,4 +152,4 @@ Real provider credentials remain server-side. Frontend clients use our API rathe
 
 ## Deliverable boundary
 
-This document is a blueprint. It does not create a server, database migration, running endpoint, provider integration, or recommendation algorithm. Teammate ownership and the integration contract with analytics remain to be agreed.
+The local backend, migrations, fixtures, and read endpoints are implemented. It remains a synthetic-data development service without authentication, provider connections, automatic scheduling, or recommendation algorithms. Analytics teammates can adapt to the documented API/query contracts; no frontend or analytics integration is claimed. Real merchant use requires separate authorization, authentication, and actual-export validation.
