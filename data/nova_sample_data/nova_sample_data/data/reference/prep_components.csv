@@ -1,0 +1,21 @@
+component_id,component_name,unit,batch_yield,prep_minutes_per_batch,hold_hours,unit_cost_usd,raw_ingredients,supplier_lead_days
+C01,Marinated grilled chicken,oz,64,45,6,0.32,"chicken thigh, garlic, lemon, spice blend",2
+C02,Braised beef barbacoa,oz,96,180,8,0.55,"beef chuck, chipotle, onion, stock",3
+C03,Crispy tofu,oz,20,30,4,0.18,"firm tofu, cornstarch, oil",2
+C04,Fried chicken tenders (breaded),pc,20,25,3,0.6,"chicken tenderloin, flour, buttermilk",2
+C05,Smash burger patties (portioned),pc,24,20,24,1.05,ground beef 80/20,2
+C06,Cilantro-lime rice,oz,120,40,4,0.06,"jasmine rice, lime, cilantro",5
+C07,Black beans,oz,96,30,8,0.05,"black beans, cumin, onion",7
+C08,Pico de gallo,oz,64,25,12,0.12,"tomato, onion, jalapeno, cilantro",2
+C09,Pickled red onion,oz,48,15,72,0.08,"red onion, vinegar, sugar",4
+C10,Shredded lettuce,oz,32,10,24,0.04,romaine,2
+C11,Queso sauce,oz,32,20,6,0.15,"cheddar, milk, chiles",4
+C12,Chipotle crema,oz,48,10,48,0.1,"sour cream, chipotle, lime",4
+C13,Hand-cut fries (blanched),oz,120,35,6,0.05,"russet potatoes, oil",3
+C14,Buffalo wing sauce,oz,32,10,72,0.07,"hot sauce, butter",5
+C15,Wings (par-cooked),pc,40,40,6,0.42,chicken wings,2
+C16,Guacamole,oz,24,20,6,0.28,"avocado, lime, onion, cilantro",2
+C17,Tortillas (warmed stack),pc,24,5,4,0.12,flour tortillas,5
+C18,Brioche buns,pc,24,2,48,0.35,brioche buns,3
+C19,Breakfast egg scramble,oz,8,15,2,0.14,"eggs, butter",3
+C20,Cookie dough (portioned),pc,24,15,72,0.3,"flour, butter, sugar, chocolate",7

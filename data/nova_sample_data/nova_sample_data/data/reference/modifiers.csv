@@ -1,0 +1,10 @@
+modifier_id,modifier_name,price_usd,applies_to,component_adjustments
+MOD01,Extra chicken,3.0,"M01,M04","[{""component_id"": ""C01"", ""qty"": 3}]"
+MOD02,Extra barbacoa,3.5,"M02,M05","[{""component_id"": ""C02"", ""qty"": 3}]"
+MOD03,Add guacamole,2.25,"M01,M02,M03,M04,M05","[{""component_id"": ""C16"", ""qty"": 2}]"
+MOD04,Add queso,1.75,"M01,M02,M04,M12","[{""component_id"": ""C11"", ""qty"": 2}]"
+MOD05,Add cheese,1.0,"M07,M08",[]
+MOD06,Add bacon,2.0,"M06,M07,M08",[]
+MOD07,Sauce: Buffalo,0.0,M09,"[{""component_id"": ""C14"", ""qty"": 1}]"
+MOD08,Sauce: Chipotle crema,0.0,M09,"[{""component_id"": ""C12"", ""qty"": 1}]"
+MOD09,No rice,0.0,"M01,M02,M03","[{""component_id"": ""C06"", ""qty"": -6}]"

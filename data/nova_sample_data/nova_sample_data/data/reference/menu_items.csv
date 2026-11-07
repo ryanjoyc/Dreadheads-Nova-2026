@@ -1,0 +1,16 @@
+menu_item_id,menu_item_name,category,price_usd,prep_complexity
+M01,Chicken Burrito Bowl,Bowls,12.49,1.0
+M02,Barbacoa Bowl,Bowls,13.99,1.0
+M03,Crispy Tofu Bowl,Bowls,11.99,1.0
+M04,Chicken Burrito,Burritos & Tacos,11.99,1.1
+M05,Barbacoa Tacos (3),Burritos & Tacos,12.49,1.2
+M06,Breakfast Burrito,Burritos & Tacos,9.99,1.0
+M07,Smash Burger,Burgers,11.49,1.3
+M08,Double Smash Burger,Burgers,14.49,1.4
+M09,Chicken Tender Basket,Baskets,12.99,1.2
+M10,Buffalo Wings (10),Baskets,14.99,1.3
+M11,Loaded Queso Fries,Sides,8.49,0.8
+M12,Fries,Sides,4.49,0.5
+M13,Chips & Guac,Sides,5.99,0.4
+M14,Chocolate Chip Cookie,Desserts,2.99,0.3
+M15,Fountain Drink,Drinks,2.49,0.1
