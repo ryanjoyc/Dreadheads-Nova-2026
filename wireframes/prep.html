@@ -150,6 +150,8 @@
     #prep-wire .note { background: #fff4e5; }
     #prep-wire .proposal { background: #e8f1ff; }
     #prep-wire .meta { color: #636366; font-size: 13px; }
+    #prep-wire .why { color: #1c1c1e; font-size: 15px; }
+    #prep-wire .rush h3 { margin-top: 8px; font-size: 13px; font-weight: 650; color: #636366; }
     #prep-wire .row {
       justify-content: space-between;
       min-height: 52px;
@@ -157,7 +159,8 @@
       border-bottom: 1px solid #e5e5ea;
     }
     #prep-wire .row:last-of-type { border-bottom: 0; }
-    #prep-wire .dish { font-size: 17px; font-weight: 600; }
+    #prep-wire .dish { display: block; font-size: 17px; font-weight: 600; }
+    #prep-wire .uses { display: block; color: #636366; font-size: 13px; }
     #prep-wire .count {
       min-width: 36px;
       color: #1c1c1e;
@@ -215,6 +218,10 @@
         <button type="button" data-span="month" aria-pressed="false">Month</button>
         <button type="button" data-span="next" aria-pressed="false">Next month</button>
       </div>
+      <div class="sub" id="mode-nav">
+        <button type="button" data-mode="dishes" aria-pressed="true">Dishes</button>
+        <button type="button" data-mode="prep" aria-pressed="false">Prep list</button>
+      </div>
       <div id="prep-panel"></div>
     </div>
     </div>
@@ -224,8 +231,8 @@
     var variations = [
       {
         name: "Wednesday lunch",
-        clock: "Wed 11:00",
-        early: "Dinner: start brisket now. It takes 4 hours, and dinner starts at 5:00.",
+        clock: "Wed 9:30",
+        early: "Dinner brisket starts at 1:00. It takes 4 hours, and dinner starts at 5:00.",
         proposal: {
           hours: "3:00–4:00",
           text: "Repeating. After school. Busy on 3 of the last 4 Wednesdays.",
@@ -235,13 +242,87 @@
           rushReason: "Approved for today. Busy on 3 of the last 4 Wednesdays.",
           listId: "school"
         },
-        dishes: { burgers: "Burgers", pad: "Pad thai", fries: "Fries", brisket: "Brisket" },
+        dishes: { burgers: "Burgers", bolognese: "Bolognese", pad: "Pad thai", fries: "Fries", brisket: "Brisket" },
         lists: {
-          lunch: { title: "Lunch", hours: "11:00–2:00", reason: "Standing rush. Next rush.", order: ["burgers", "pad", "fries"], counts: { burgers: 14, pad: 9, fries: 6 } },
-          dinner: { title: "Dinner", hours: "5:00–7:30", reason: "Standing rush.", order: ["burgers", "fries", "brisket"], counts: { burgers: 18, fries: 11, brisket: 6 } },
-          school: { title: "After school", hours: "3:00–4:00", reason: "Approved for today. Busy on 3 of the last 4 Wednesdays.", order: ["burgers", "fries"], counts: { burgers: 10, fries: 8 } },
-          thuLunch: { title: "Lunch", hours: "11:00–2:00", reason: "Standing rush.", order: ["burgers", "pad", "fries"], counts: { burgers: 11, pad: 8, fries: 5 } },
-          thuDinner: { title: "Dinner", hours: "5:00–7:30", reason: "Standing rush.", order: ["burgers", "fries", "brisket"], counts: { burgers: 16, fries: 9, brisket: 6 } }
+          lunch: { title: "Lunch", hours: "11:00–2:00", reason: "Standing rush. Next rush.", why: "Last four Wednesdays at lunch, plus about 20% more orders than this date last year.", order: ["burgers", "bolognese", "pad", "fries"], counts: { burgers: 14, bolognese: 8, pad: 9, fries: 6 } },
+          dinner: { title: "Dinner", hours: "5:00–7:30", reason: "Standing rush.", why: "Wednesday dinners run heavier than lunch. Brisket has to start at 1:00.", order: ["burgers", "bolognese", "fries", "brisket"], counts: { burgers: 18, bolognese: 10, fries: 11, brisket: 6 } },
+          school: { title: "After school", hours: "3:00–4:00", reason: "Approved for today.", why: "Busy on 3 of the last 4 Wednesdays at these hours.", order: ["burgers", "fries"], counts: { burgers: 10, fries: 8 } },
+          thuLunch: { title: "Lunch", hours: "11:00–2:00", reason: "Standing rush.", why: "Last four Thursdays at lunch. No extra lift from last year.", order: ["burgers", "bolognese", "pad", "fries"], counts: { burgers: 11, bolognese: 6, pad: 8, fries: 5 } },
+          thuDinner: { title: "Dinner", hours: "5:00–7:30", reason: "Standing rush.", why: "Thursday dinner matches the last four Thursdays. Brisket still starts at 1:00.", order: ["burgers", "bolognese", "fries", "brisket"], counts: { burgers: 16, bolognese: 8, fries: 9, brisket: 6 } }
+        },
+        prep: {
+          lunch: {
+            now: [
+              { name: "Ground beef", amount: "3 lb", uses: "Camera sees 4 lb of 7 lb. Burgers, bolognese." },
+              { name: "Shrimp", amount: "9 portions", uses: "Camera sees none. Portion now. Pad thai." },
+              { name: "Buns", amount: "14", uses: "Camera sees a full tray. Pull them now. Burgers." }
+            ],
+            wait: [
+              { name: "Pasta", amount: "2 lb", uses: "Cook when lunch starts. Bolognese." },
+              { name: "Rice noodles", amount: "9 portions", uses: "Soaks and dies if it waits. Pad thai." },
+              { name: "Potatoes", amount: "3 lb", uses: "Fry when lunch starts. Fries." },
+              { name: "Eggs", amount: "9", uses: "Pad thai." },
+              { name: "Tomato", amount: "14", uses: "Burgers, bolognese." },
+              { name: "Onion", amount: "8", uses: "Bolognese." },
+              { name: "Lettuce", amount: "14", uses: "Wilts if it is dressed early. Burgers." },
+              { name: "Bean sprouts", amount: "9 handfuls", uses: "Pad thai." },
+              { name: "Salt", amount: "to taste", uses: "All of these dishes." },
+              { name: "Pepper", amount: "to taste", uses: "Burgers, bolognese." },
+              { name: "Fish sauce", amount: "9 tbsp", uses: "Pad thai." },
+              { name: "Oil", amount: "1 cup", uses: "Fries, pad thai." }
+            ]
+          },
+          dinner: {
+            now: [
+              { name: "Ground beef", amount: "5 lb", uses: "Camera sees 4 lb of 9 lb. Burgers, bolognese." }
+            ],
+            wait: [
+              { name: "Brisket", amount: "6 portions", uses: "Camera sees none. Start at 1:00, not at 9:30." },
+              { name: "Buns", amount: "18", uses: "Pull closer to dinner. Burgers." },
+              { name: "Pasta", amount: "2.5 lb", uses: "Cook when dinner starts. Bolognese." },
+              { name: "Potatoes", amount: "5 lb", uses: "Fry when dinner starts. Fries." },
+              { name: "Salt", amount: "to taste", uses: "All of these dishes." },
+              { name: "Pepper", amount: "to taste", uses: "Burgers, bolognese, brisket." },
+              { name: "Oil", amount: "2 cups", uses: "Fries." }
+            ]
+          },
+          school: {
+            now: [
+              { name: "Ground beef", amount: "2.5 lb", uses: "Camera sees none. Burgers." }
+            ],
+            wait: [
+              { name: "Buns", amount: "10", uses: "Burgers." },
+              { name: "Potatoes", amount: "4 lb", uses: "Fry when this rush starts. Fries." },
+              { name: "Salt", amount: "to taste", uses: "Burgers, fries." },
+              { name: "Oil", amount: "1 cup", uses: "Fries." }
+            ]
+          },
+          thuLunch: {
+            now: [
+              { name: "Ground beef", amount: "5 lb", uses: "Camera sees none. Burgers, bolognese." },
+              { name: "Shrimp", amount: "8 portions", uses: "Portion ahead. Pad thai." }
+            ],
+            wait: [
+              { name: "Pasta", amount: "1.5 lb", uses: "Cook when lunch starts. Bolognese." },
+              { name: "Rice noodles", amount: "8 portions", uses: "Pad thai." },
+              { name: "Potatoes", amount: "2.5 lb", uses: "Fry when lunch starts. Fries." },
+              { name: "Salt", amount: "to taste", uses: "All of these dishes." },
+              { name: "Fish sauce", amount: "8 tbsp", uses: "Pad thai." }
+            ]
+          },
+          thuDinner: {
+            now: [
+              { name: "Ground beef", amount: "8 lb", uses: "Camera sees none. Burgers, bolognese." }
+            ],
+            wait: [
+              { name: "Brisket", amount: "6 portions", uses: "Start at 1:00. Brisket." },
+              { name: "Buns", amount: "16", uses: "Burgers." },
+              { name: "Pasta", amount: "2 lb", uses: "Bolognese." },
+              { name: "Potatoes", amount: "4 lb", uses: "Fries." },
+              { name: "Salt", amount: "to taste", uses: "All of these dishes." },
+              { name: "Pepper", amount: "to taste", uses: "Burgers, bolognese, brisket." }
+            ]
+          }
         },
         today: ["lunch", "dinner"],
         tomorrow: ["thuLunch", "thuDinner"],
@@ -252,7 +333,7 @@
         },
         setup: {
           hours: ["Lunch 11:00–2:00", "Dinner 5:00–7:30"],
-          durations: ["Brisket, 4 hours", "Pad thai, 15 minutes", "Burgers, 10 minutes", "Fries, 8 minutes"]
+          durations: ["Brisket, 4 hours", "Bolognese, 25 minutes", "Pad thai, 15 minutes", "Burgers, 10 minutes", "Fries, 8 minutes"]
         }
       },
       {
@@ -262,10 +343,10 @@
         proposal: null,
         dishes: { burgers: "Burgers", salad: "Salad", fries: "Fries" },
         lists: {
-          lunch: { title: "Dinner", hours: "5:00–7:30", reason: "Standing rush. Next rush.", order: ["salad", "burgers", "fries"], counts: { salad: 7, burgers: 4, fries: 3 } },
-          dinner: { title: "Dinner", hours: "5:00–7:30", reason: "Standing rush.", order: ["salad", "burgers", "fries"], counts: { salad: 7, burgers: 4, fries: 3 } },
-          wedLunch: { title: "Lunch", hours: "11:00–2:00", reason: "Standing rush.", order: ["burgers", "salad", "fries"], counts: { burgers: 6, salad: 5, fries: 2 } },
-          wedDinner: { title: "Dinner", hours: "5:00–7:30", reason: "Standing rush.", order: ["salad", "burgers", "fries"], counts: { salad: 8, burgers: 5, fries: 3 } }
+          lunch: { title: "Dinner", hours: "5:00–7:30", reason: "Standing rush. Next rush.", why: "Last four Tuesdays at dinner. A quiet night, no lift from last year.", order: ["salad", "burgers", "fries"], counts: { salad: 7, burgers: 4, fries: 3 } },
+          dinner: { title: "Dinner", hours: "5:00–7:30", reason: "Standing rush.", why: "Last four Tuesdays at dinner. A quiet night, no lift from last year.", order: ["salad", "burgers", "fries"], counts: { salad: 7, burgers: 4, fries: 3 } },
+          wedLunch: { title: "Lunch", hours: "11:00–2:00", reason: "Standing rush.", why: "Last four Wednesdays at lunch.", order: ["burgers", "salad", "fries"], counts: { burgers: 6, salad: 5, fries: 2 } },
+          wedDinner: { title: "Dinner", hours: "5:00–7:30", reason: "Standing rush.", why: "Last four Wednesdays at dinner.", order: ["salad", "burgers", "fries"], counts: { salad: 8, burgers: 5, fries: 3 } }
         },
         today: ["dinner"],
         tomorrow: ["wedLunch", "wedDinner"],
@@ -273,6 +354,59 @@
           week: { label: "This week", order: ["salad", "burgers", "fries"], counts: { salad: 40, burgers: 28, fries: 16 } },
           month: { label: "This month", order: ["salad", "burgers", "fries"], counts: { salad: 150, burgers: 110, fries: 60 } },
           next: { label: "Next month", order: ["salad", "burgers", "fries"], counts: { salad: 160, burgers: 120, fries: 64 } }
+        },
+        prep: {
+          lunch: {
+            now: [
+              { name: "Ground beef", amount: "1 lb", uses: "Camera sees none. Burgers." }
+            ],
+            wait: [
+              { name: "Buns", amount: "4", uses: "Pull when dinner starts. Burgers." },
+              { name: "Potatoes", amount: "1.5 lb", uses: "Fry when dinner starts. Fries." },
+              { name: "Lettuce", amount: "11", uses: "Camera sees a half pan. Salad, burgers." },
+              { name: "Tomato", amount: "11", uses: "Salad, burgers." },
+              { name: "Salt", amount: "to taste", uses: "All of these dishes." },
+              { name: "Oil", amount: "1/2 cup", uses: "Fries, salad." }
+            ]
+          },
+          dinner: {
+            now: [
+              { name: "Ground beef", amount: "1 lb", uses: "Camera sees none. Burgers." }
+            ],
+            wait: [
+              { name: "Buns", amount: "4", uses: "Burgers." },
+              { name: "Potatoes", amount: "1.5 lb", uses: "Fries." },
+              { name: "Lettuce", amount: "11", uses: "Salad, burgers." },
+              { name: "Tomato", amount: "11", uses: "Salad, burgers." },
+              { name: "Salt", amount: "to taste", uses: "All of these dishes." },
+              { name: "Oil", amount: "1/2 cup", uses: "Fries, salad." }
+            ]
+          },
+          wedLunch: {
+            now: [
+              { name: "Ground beef", amount: "1.5 lb", uses: "Camera sees none. Burgers." }
+            ],
+            wait: [
+              { name: "Buns", amount: "6", uses: "Burgers." },
+              { name: "Potatoes", amount: "1 lb", uses: "Fries." },
+              { name: "Lettuce", amount: "11", uses: "Salad, burgers." },
+              { name: "Tomato", amount: "11", uses: "Salad, burgers." },
+              { name: "Salt", amount: "to taste", uses: "All of these dishes." }
+            ]
+          },
+          wedDinner: {
+            now: [
+              { name: "Ground beef", amount: "1.25 lb", uses: "Camera sees none. Burgers." }
+            ],
+            wait: [
+              { name: "Buns", amount: "5", uses: "Burgers." },
+              { name: "Potatoes", amount: "1.5 lb", uses: "Fries." },
+              { name: "Lettuce", amount: "13", uses: "Salad, burgers." },
+              { name: "Tomato", amount: "13", uses: "Salad, burgers." },
+              { name: "Salt", amount: "to taste", uses: "All of these dishes." },
+              { name: "Oil", amount: "1/2 cup", uses: "Fries, salad." }
+            ]
+          }
         },
         setup: {
           hours: ["Lunch 11:00–2:00", "Dinner 5:00–7:30"],
@@ -284,6 +418,7 @@
     var root = document.getElementById("prep-wire");
     var panel = document.getElementById("prep-panel");
     var aheadNav = document.getElementById("ahead-nav");
+    var modeNav = document.getElementById("mode-nav");
     var picker = document.getElementById("variation");
     var clock = document.getElementById("clock");
     var statusTime = document.getElementById("status-time");
@@ -291,6 +426,7 @@
     var view = "next";
     var span = "week";
     var proposal = "pending";
+    var mode = "dishes";
     var order = {};
 
     function esc(value) {
@@ -314,14 +450,34 @@
         var count = counts[id];
         if (!count) return "";
         var name = data().dishes[id] || id;
-        return '<div class="row"><span class="dish">' + esc(name) + '</span><span class="moves"><span class="count">' + count + '</span><button type="button" data-act="up" data-list="' + listId + '" data-id="' + id + '" aria-label="Move ' + esc(name) + ' up">Up</button><button type="button" data-act="down" data-list="' + listId + '" data-id="' + id + '" aria-label="Move ' + esc(name) + ' down">Down</button></span></div>';
+        return '<div class="row"><span class="dish">' + esc(name) + '</span><span class="count">' + count + '</span></div>';
       }).join("");
+    }
+
+    function ingredientRows(items) {
+      return items.map(function (item) {
+        return '<div class="row"><span><span class="dish">' + esc(item.name) + '</span><span class="uses">' + esc(item.uses) + '</span></span><span class="count">' + esc(item.amount) + '</span></div>';
+      }).join("");
+    }
+
+    function prepRows(listId) {
+      var block = (data().prep && data().prep[listId]) || { now: [], wait: [] };
+      var now = block.now || [];
+      var wait = block.wait || [];
+      if (!now.length && !wait.length) return '<p class="meta">No ingredients for these dishes.</p>';
+      var rush = data().lists[listId].title.toLowerCase();
+      var html = '<p class="meta">On hand is read from the walk-in camera.</p>';
+      if (now.length) html += '<h3>Start now</h3>' + ingredientRows(now);
+      if (wait.length) html += '<h3>Wait until ' + esc(rush) + '</h3>' + ingredientRows(wait);
+      return html;
     }
 
     function rushBlock(listId, reason) {
       var list = data().lists[listId];
       var shown = reason || list.reason;
-      return '<section class="rush" aria-label="' + esc(list.title) + '"><h2>' + esc(list.title) + ' · ' + esc(list.hours) + '</h2><p class="meta">' + esc(shown) + '</p>' + rows(listId, list.counts) + '</section>';
+      var body = mode === "prep" ? prepRows(listId) : rows(listId, list.counts);
+      var why = list.why ? '<p class="why">' + esc(list.why) + '</p>' : '';
+      return '<section class="rush" aria-label="' + esc(list.title) + '"><h2>' + esc(list.title) + ' · ' + esc(list.hours) + '</h2><p class="meta">' + esc(shown) + '</p>' + why + body + '</section>';
     }
 
     function proposalBlock() {
@@ -354,7 +510,11 @@
       root.querySelectorAll("[data-span]").forEach(function (button) {
         button.setAttribute("aria-pressed", button.getAttribute("data-span") === span ? "true" : "false");
       });
+      root.querySelectorAll("[data-mode]").forEach(function (button) {
+        button.setAttribute("aria-pressed", button.getAttribute("data-mode") === mode ? "true" : "false");
+      });
       aheadNav.hidden = view !== "ahead";
+      modeNav.hidden = view === "ahead" || view === "setup";
       var html = "";
       if (view === "next") {
         html = '<div class="stack">';
@@ -375,17 +535,6 @@
       panel.innerHTML = html;
     }
 
-    function move(listId, id, direction) {
-      var list = order[listId];
-      if (!list) return;
-      var index = list.indexOf(id);
-      var next = index + direction;
-      if (index < 0 || next < 0 || next >= list.length) return;
-      var swap = list[index];
-      list[index] = list[next];
-      list[next] = swap;
-    }
-
     variations.forEach(function (item, index) {
       var option = document.createElement("option");
       option.value = String(index);
@@ -398,6 +547,7 @@
       view = "next";
       span = "week";
       proposal = "pending";
+      mode = "dishes";
       loadOrder();
       paint();
     });
@@ -415,11 +565,14 @@
         paint();
         return;
       }
+      if (target.hasAttribute("data-mode")) {
+        mode = target.getAttribute("data-mode");
+        paint();
+        return;
+      }
       var act = target.getAttribute("data-act");
       if (act === "approve") proposal = "approved";
       if (act === "reject") proposal = "rejected";
-      if (act === "up") move(target.getAttribute("data-list"), target.getAttribute("data-id"), -1);
-      if (act === "down") move(target.getAttribute("data-list"), target.getAttribute("data-id"), 1);
       paint();
     });
 
