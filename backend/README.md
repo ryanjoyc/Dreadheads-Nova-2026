@@ -2,7 +2,7 @@
 
 Local Python 3.12 / FastAPI / PostgreSQL 17 backend for synthetic DoorDash and Grubhub reports. Docker Compose is the only required host runtime. No provider credentials are needed.
 
-This backend serves observed sales records, plus two summaries built from them (order search and top dishes). It does not calculate forecasts, ingredient needs, or inventory, and does not implement the recommendation endpoints or connect the prep wireframe.
+This backend serves observed sales records, plus summaries built from them (order search, top dishes, and an OpenRouter rush-hour agent). It does not calculate forecasts, ingredient needs, or inventory, and does not implement the recommendation endpoints or connect the prep wireframe.
 
 ## Start the backend
 
@@ -79,14 +79,42 @@ curl 'http://127.0.0.1:8000/dishes/top?limit=5&date_start=2026-05-01&date_end=20
 | Endpoint | Filters | Meaning |
 | --- | --- | --- |
 | `/orders/filter` | `store_id`, `store_name`, `source`, `date` or `date_start`/`date_end`, `time_start`/`time_end`, `item_name` | Matching orders, oldest first, each with all of its items. Paged with `limit`/`cursor` |
-| `/dishes/top` | `limit` (number of dishes, default 10, max 100), plus every filter above except `item_name` | Dishes ranked by units sold, then order count, then name |
+| `/dishes/top` | `limit` (number of dishes, default 10, max 100), `start`/`end`, plus every filter above except `item_name` | Dishes ranked by units sold, then order count, then name |
 
 Both endpoints read through `queries.list_stores` and `queries.list_order_lines`, the functions behind `/stores` and `/order-lines`, in `nova_backend/analytics.py`. They page through every matching line, so prefer a date range on the full dataset.
 
 - `store_name` and `item_name` are case-insensitive substring matches; `store_name=Craig St` covers that store on both platforms.
 - `date` is one store-local day. It cannot be combined with `date_start`/`date_end`.
 - `time_start`/`time_end` are store-local times of day, start inclusive and end exclusive. A start after the end crosses midnight, so `time_start=22:00&time_end=02:00` means late night.
+- `/dishes/top` also takes exact store-local moments: `start=2026-05-01T11:00&end=2026-05-01T13:30` (start inclusive, end exclusive, either optional, and they can span days). They cannot be combined with `date`/`date_start`/`date_end`, unlike `time_start`/`time_end`, which apply a time of day to every day in the range.
 - `/dishes/top` groups dishes by exact item name across platforms and stores. It reports `units` (summed quantities) and `orders` (distinct orders), and echoes the date range it used.
+
+## Predict rush hours
+
+```sh
+curl 'http://127.0.0.1:8000/rush-hours?date=2026-10-23&time=10:00&store_name=Strip%20District'
+curl 'http://127.0.0.1:8000/rush-hours?date=2026-11-13&time=16:30&context=home%20football%20game%20at%208pm'
+```
+
+`GET /rush-hours` predicts the time frames of heavy order traffic on `date`, from `time` (the current store-local time, default 00:00) onward. Each window says whether it is `in_progress` or `upcoming` and how many minutes away it is.
+
+| Parameter | Meaning |
+| --- | --- |
+| `date` (required), `time`, `until` | The day, the current time, and an optional cutoff |
+| `store_name`, `store_id`, `source` | Store scope, as in `/orders/filter` |
+| `context` | What the manager knows about the day (event, weather); only the AI agent uses it |
+| `weeks` (default 8), `slot_minutes` (15, 30, or 60) | History to average and slot size |
+| `use_agent` (default true) | Set false to skip OpenRouter |
+
+How it decides, in `nova_backend/rush.py` and `nova_backend/rush_agent.py`:
+
+1. Python averages distinct orders per slot over the same weekday in the previous `weeks` weeks (days with no orders are skipped). A slot is a spike when it expects at least 1.5x the typical active slot and at least 2 orders; adjacent spike slots form one rush window.
+2. If `OPENROUTER_KEY` is set, an OpenRouter agent investigates with read-only tools built on the `/order-lines` and `/stores` query functions: `get_rush_forecast`, `get_day_traffic`, `count_orders`, and `get_top_dishes`. It only sees days before `date`. It returns rush windows, each with a multiplier between 0.5x and 2.0x and a reason.
+3. Python snaps the agent's windows to the slot grid, clamps multipliers (recording `clamped_from`), drops overlaps, and recomputes `expected_orders` and `expected_peak_orders` from the forecast. `agent_trace` lists each tool call with a one-line result.
+
+Without a key, with `use_agent=false`, or if OpenRouter fails, the response uses the plain forecast (`method: "baseline"`) and adds an `ai_unavailable` flag. `confidence` is low with fewer than 3 history days; otherwise it reflects how many recent weeks were busy in that window (`consistency`). When `date` already has recorded orders, `actual_orders` shows what really happened, as a backtest.
+
+To enable the agent, put the key in `backend/.env` (copy `.env.example`): `OPENROUTER_KEY=sk-or-...`. Compose passes it to the API container; recreate it with `docker compose up -d api`. `OPENROUTER_MODEL` picks any tool-calling model. Never commit `.env`: OpenRouter disables keys it finds in repositories.
 
 There is no automatic cross-platform restaurant or dish mapping. The feeds share a schema while retaining separate source identities. Analytics may reuse query functions under `nova_backend.queries` inside trusted Python code, or consume these endpoints.
 
